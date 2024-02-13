@@ -10,28 +10,38 @@ def calculate_centroid_distance(points):
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
     
-def IDT(gaze_data, dispersion_threshold, duration_threshold, hz):
+
+def IDT(gaze_data, dispersion_threshold, duration_threshold):
     fixations = []
-    duration = 0
+
+    if len(gaze_data) == 0:
+        return fixations
+    
+    fixation_id = 1
     isFixation = False
 
-    current_fixation = []
-    for i in range(0, len(gaze_data)):
-        current_fixation.append(gaze_data[i])
-        duration += 1/hz
-        print(duration)
-        if duration >= duration_threshold:
-            print(calculate_centroid_distance(current_fixation))
-            if calculate_centroid_distance(current_fixation) < dispersion_threshold:
-                isFixation = True
+    current_fixation = [gaze_data[0] + (fixation_id,)]
+    for i in range(1, len(gaze_data)):
+        current_point = gaze_data[i] + (fixation_id,)
+        duration = current_point[0] - current_fixation[0][0]
+        current_fixation.append(current_point)
+        distance = calculate_distance(current_point[1], current_point[2],
+                                      current_fixation[0][1], current_fixation[0][2])
+
+        if distance >= dispersion_threshold:
+            if isFixation:
+                current_fixation.pop()
+                fixations.append(current_fixation)
+                fixation_id += 1
+                current_fixation = [current_point]
             else:
-                if isFixation:
-                    new_start = current_fixation.pop()
-                    isFixation = False
-                    duration = 0
-                    fixations.append(current_fixation)
-                    current_fixation = [new_start]
-    return fixations 
+                current_fixation = [current_point]
+            isFixation = False
+
+        if duration >= duration_threshold:
+            isFixation = True
+
+    return fixations
 
 eye_tracking_data = [
     (0, 100, 100),   # Timestamp, x-coordinate, y-coordinate
@@ -59,9 +69,8 @@ eye_tracking_data = [
 
 duration_threshold = 150
 dispersion_threshold = 30  
-hz = 1/100
 
-fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold, hz)
+fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 for fixation in fixations:
