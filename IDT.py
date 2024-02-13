@@ -1,7 +1,8 @@
 import math
 
 def calculate_distance(x1, y1, x2, y2):
-    return math.sqrt((x2-x1) ** 2 + (y2 - y1) ** 2)
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
 
 def calculate_centroid_distance(points):
     x_values = [point[1] for point in points]
@@ -9,14 +10,14 @@ def calculate_centroid_distance(points):
     mean_x = sum(x_values) / len(x_values)
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
-    
+
 
 def IDT(gaze_data, dispersion_threshold, duration_threshold):
     fixations = []
 
     if len(gaze_data) == 0:
         return fixations
-    
+
     fixation_id = 1
     isFixation = False
 
@@ -43,8 +44,9 @@ def IDT(gaze_data, dispersion_threshold, duration_threshold):
 
     return fixations
 
+
 eye_tracking_data = [
-    (0, 100, 100),   # Timestamp, x-coordinate, y-coordinate
+    (0, 100, 100),  # Timestamp, x-coordinate, y-coordinate
     (100, 105, 102),
     (200, 110, 98),
     (300, 115, 95),
@@ -68,7 +70,7 @@ eye_tracking_data = [
 ]
 
 duration_threshold = 150
-dispersion_threshold = 30  
+dispersion_threshold = 30
 
 fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
