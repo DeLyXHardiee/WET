@@ -10,7 +10,7 @@ def calculate_centroid_distance(points):
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
     
-def IDT(gaze_data, dispersion_threshold, duration_threshold, hz):
+def IDT(gaze_data, duration_threshold, dispersion_threshold, hz):
     fixations = []
     duration = 0
     isFixation = False
@@ -22,15 +22,25 @@ def IDT(gaze_data, dispersion_threshold, duration_threshold, hz):
         print(duration)
         if duration >= duration_threshold:
             print(calculate_centroid_distance(current_fixation))
-            if calculate_centroid_distance(current_fixation) < dispersion_threshold:
+            if calculate_centroid_distance(current_fixation) <= dispersion_threshold:
+                print(calculate_centroid_distance(current_fixation))
+                print(dispersion_threshold)
                 isFixation = True
+                if i == len(gaze_data) - 1:
+                    fixations.append(current_fixation)
             else:
                 if isFixation:
                     new_start = current_fixation.pop()
                     isFixation = False
-                    duration = 0
                     fixations.append(current_fixation)
                     current_fixation = [new_start]
+                    duration = 1/hz
+                else:
+                    current_fixation.reverse()
+                    while calculate_centroid_distance(current_fixation) > dispersion_threshold:
+                        current_fixation.pop()
+                        duration += -(1/hz)
+                    current_fixation.reverse()
     return fixations 
 
 eye_tracking_data = [
@@ -54,12 +64,18 @@ eye_tracking_data = [
     (1700, 380, 60),
     (1800, 385, 58),
     (1900, 390, 55),
-    (2000, 2500, -1500)
+    (2000, 2500, -1500),
+    (2100, 2505, -1502),
+    (2200, 2510, -1504),
+    (2300, 2515, -1506),
+    (2400, 2520, -1508),
+    (2500, 400, 100),
+    (2600, 510, 115)
 ]
 
 duration_threshold = 150
 dispersion_threshold = 30  
-hz = 1/100
+hz = 1/10
 
 fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold, hz)
 
