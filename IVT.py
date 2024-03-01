@@ -1,4 +1,23 @@
 import numpy as np
+import csv
+
+
+def calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels):
+    """Calculate velocity threshold based on screen resolution, viewing distance, and sampling rate."""
+    # Calculate angular size of the screen
+    screen_width_pixels, screen_height_pixels = screen_resolution
+    screen_width_mm = 2 * np.arctan((screen_width_pixels / 2) / viewing_distance) * (180 / np.pi)
+    screen_height_mm = 2 * np.arctan((screen_height_pixels / 2) / viewing_distance) * (180 / np.pi)
+
+    # Convert pixel displacement to angular displacement
+    pixel_size_mm = screen_width_mm / screen_width_pixels
+    max_displacement_mm = distance_threshold_pixels * pixel_size_mm
+
+    # Calculate angular threshold
+    angular_threshold = np.arctan(max_displacement_mm / viewing_distance)
+
+    # Calculate velocity threshold
+    return angular_threshold * sampling_rate
 
 
 def calculate_velocity(point1, point2):
@@ -28,16 +47,33 @@ def i_vt(protocol, velocity_threshold):
     if current_group:
         fixation_points.append(current_group)
 
-    fixation_groups = []
+    """fixation_groups = []
     for group in fixation_points:
         centroid = np.mean(group, axis=0)
         fixation_groups.append(centroid)
+        """
 
-    return fixation_groups
+    return fixation_points
+
+def write_tuples_to_csv(tuples, filename):
+    """Write tuples to a CSV file with row numbers."""
+    with open(filename, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        for i, tpl in enumerate(tuples, start=1):
+            row = [i] + list(tpl)  # Add row number to the beginning of the tuple
+            csv_writer.writerow(row)
 
 
+screen_resolution = (1680, 1050)  # Screen resolution in pixels (width x height)
+viewing_distance = 550  # Viewing distance in millimeters
+sampling_rate = 1000  # Sampling rate in Hz
+distance_threshold_pixels = 10  # Distance threshold in pixels
+velocity_threshold = calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels)
+
+print("Velocity threshold:", velocity_threshold)
 # Example usage:
 protocol = [(0, 1, 1), (1, 2, 2), (2, 3, 3), (3, 4, 4), (4, 5, 5), (5, 6, 6)]
-velocity_threshold = 1.0
 fixations = i_vt(protocol, velocity_threshold)
+write_tuples_to_csv(fixations)
+
 print("Fixation points:", fixations)
