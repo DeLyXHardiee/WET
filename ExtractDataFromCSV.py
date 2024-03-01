@@ -22,4 +22,4 @@ def extract_data(excel_file_path):
     })
     return extracted_data
 
-print(extract_data('S_9016_S1_RAN.csv'))
+#print(extract_data('S_9016_S1_RAN.csv'))

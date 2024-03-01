@@ -56,22 +56,32 @@ def i_vt(protocol, velocity_threshold):
     return fixation_points
 
 def write_tuples_to_csv(tuples, filename):
+    #print(len(tuples))
     """Write tuples to a CSV file with row numbers."""
-    with open(filename, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        for i, tpl in enumerate(tuples, start=1):
-            row = [i] + list(tpl)  # Add row number to the beginning of the tuple
-            csv_writer.writerow(row)
+    with open(filename, 'w') as file:
+        counter = 0
+        for fixation in tuples:
+            counter +=1
+            if len(fixation) < 2:
+                continue
+            #print(counter)
+            file.write("\n")
+            file.write("counter: " + str(counter))
+            file.write("\n")
+            for data in fixation:
+                # Access depth value at this point
+                file.write(str(data))
+                file.write("\n")
 
 
 screen_resolution = (1680, 1050)  # Screen resolution in pixels (width x height)
 viewing_distance = 550  # Viewing distance in millimeters
 sampling_rate = 1000  # Sampling rate in Hz
-distance_threshold_pixels = 10  # Distance threshold in pixels
+distance_threshold_pixels = 1  # Distance threshold in pixels
 velocity_threshold = calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels)
 
 
 # Example usage:
-protocol = extract_data("S_9016_S1_RAN.csv")
+protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y']), axis=1)
 fixations = i_vt(protocol, velocity_threshold)
-write_tuples_to_csv(fixations)
+write_tuples_to_csv(fixations,'out.txt')

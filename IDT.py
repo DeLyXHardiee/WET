@@ -1,4 +1,5 @@
 import math
+from ExtractDataFromCSV import extract_data
 
 def calculate_distance(x1, y1, x2, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -10,15 +11,17 @@ def calculate_centroid_distance(points):
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
     
-def IDT(gaze_data, duration_threshold, dispersion_threshold, hz):
+def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     fixations = []
     duration = 0
     isFixation = False
 
     current_fixation = []
-    for i in range(0, len(gaze_data)):
-        current_fixation.append(gaze_data[i])
-        duration += 1/hz
+    tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y']), axis=1)
+    for row in tuple_values:
+        print("tuple values: \n" + str(row))
+        current_fixation.append(tuple)
+        duration += 1
         print(duration)
         if duration >= duration_threshold:
             print(calculate_centroid_distance(current_fixation))
@@ -26,7 +29,7 @@ def IDT(gaze_data, duration_threshold, dispersion_threshold, hz):
                 print(calculate_centroid_distance(current_fixation))
                 print(dispersion_threshold)
                 isFixation = True
-                if i == len(gaze_data) - 1:
+                if i == len(eye_tracking_data) - 1:
                     fixations.append(current_fixation)
             else:
                 if isFixation:
@@ -34,15 +37,15 @@ def IDT(gaze_data, duration_threshold, dispersion_threshold, hz):
                     isFixation = False
                     fixations.append(current_fixation)
                     current_fixation = [new_start]
-                    duration = 1/hz
+                    duration = 0
                 else:
                     current_fixation.reverse()
                     while calculate_centroid_distance(current_fixation) > dispersion_threshold:
                         current_fixation.pop()
-                        duration += -(1/hz)
+                        duration += -1
                     current_fixation.reverse()
     return fixations 
-
+'''
 eye_tracking_data = [
     (0, 100, 100),  # Timestamp, x-coordinate, y-coordinate
     (100, 105, 102),
@@ -72,12 +75,14 @@ eye_tracking_data = [
     (2500, 400, 100),
     (2600, 510, 115)
 ]
+'''
+eye_tracking_data = extract_data('S_9016_S1_RAN.csv')
 
 duration_threshold = 150
 dispersion_threshold = 30  
-hz = 1/10
+hz = 1000
 
-fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold, hz)
+fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 for fixation in fixations:
