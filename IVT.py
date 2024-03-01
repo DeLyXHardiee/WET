@@ -1,6 +1,6 @@
 import numpy as np
 import csv
-
+from ExtractDataFromCSV import extract_data
 
 def calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels):
     """Calculate velocity threshold based on screen resolution, viewing distance, and sampling rate."""
@@ -70,10 +70,8 @@ sampling_rate = 1000  # Sampling rate in Hz
 distance_threshold_pixels = 10  # Distance threshold in pixels
 velocity_threshold = calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels)
 
-print("Velocity threshold:", velocity_threshold)
+
 # Example usage:
-protocol = [(0, 1, 1), (1, 2, 2), (2, 3, 3), (3, 4, 4), (4, 5, 5), (5, 6, 6)]
+protocol = extract_data("S_9016_S1_RAN.csv")
 fixations = i_vt(protocol, velocity_threshold)
 write_tuples_to_csv(fixations)
-
-print("Fixation points:", fixations)
