@@ -6,30 +6,6 @@ subject = (0, 0, 55)
 def calculate_distance(x1, y1, x2, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-def calculate_angle_between_points(point1, point3):
-    # Calculate vectors AB and BC
-    vector_AB = [subject[i] - point1[i] for i in range(3)]
-    vector_BC = [point3[i] - subject[i] for i in range(3)]
-
-    # Calculate dot product of AB and BC
-    dot_product = sum(vector_AB[i] * vector_BC[i] for i in range(3))
-
-    # Calculate magnitudes of AB and BC
-    magnitude_AB = math.sqrt(sum(coord**2 for coord in vector_AB))
-    magnitude_BC = math.sqrt(sum(coord**2 for coord in vector_BC))
-
-    # Calculate cosine of the angle
-    cosine_theta = dot_product / (magnitude_AB * magnitude_BC)
-
-    # Calculate the angle in radians
-    if cosine_theta > 1:
-        cosine_theta = 1
-    elif cosine_theta < -1:
-        cosine_theta = -1
-    angle_radians = math.acos(cosine_theta)
-
-    return angle_radians*(180/math.pi)
-
 def calculate_centroid_distance(points):
     if len(points) < 2:
         return 0
@@ -38,24 +14,7 @@ def calculate_centroid_distance(points):
     mean_x = sum(x_values) / len(x_values)
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
-    return max(calculate_angle_between_points((mean_x, mean_y,0), (point[1], point[2],0)) for point in points)
     
-def get_bounds(points):
-    max_x = 0
-    max_y = 0
-    min_x = 0
-    min_y = 0
-    for point in points:
-        if point[1] > max_x:
-            max_x = point[1]
-        if point[1] < min_x:
-            min_x = point[1]
-        if point[2] > max_y:
-            max_y = point[2]
-        if point[2] < min_y:
-            min_y = point[2]
-    return (max_x,max_y),(min_x,min_y)
-
 def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     fixations = []
     duration = 0
@@ -129,18 +88,12 @@ eye_tracking_data = [
 ]
 '''
 
-point3 = (-14.817994,6.432674, 0)
-point1 = (-17.23406,8.249892, 0)
-point2 = (0, 0, 55)
-#angle = 180-calculate_angle_between_points(point1, point2, point3)
-#print("angle: " + str(angle))
-
 eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
 
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
 
-duration_threshold = 150
+duration_threshold = 100
 dispersion_threshold = 1
 hz = 1000
 
@@ -148,5 +101,5 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 print(len(fixations))
-for fixation in fixations:
-    print(len(fixation))
+#for fixation in fixations:
+    #print(len(fixation))
