@@ -88,12 +88,35 @@ eye_tracking_data = [
 ]
 '''
 
+def write_tuples_to_csv(tuples, filename):
+    #print(len(tuples))
+    """Write tuples to a CSV file with row numbers."""
+    with open(filename, 'w') as file:
+        counter = 0
+        for fixation in tuples:
+            counter +=1
+            if len(fixation) < 2:
+                continue
+            #print(counter)
+            file.write("\n")
+            file.write("counter: " + str(counter))
+            file.write("\n")
+            for data in fixation:
+                # Access depth value at this point
+                file.write(str(data))
+                file.write("\n")
+
 eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
 
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
 
+# We can get the same amount of fixations, but they don't match at all
+# First fixation matches precisely on the 7th point in the data. Second fixation is nowhere close, 100 ms apart
+# This seems to be because our algorithm skips short fixations.
+# 72 gets same amount of fixations with 1 dispersion
 duration_threshold = 100
+# 0.8 gets same amount of fixations with 100 duration
 dispersion_threshold = 1
 hz = 1000
 
@@ -101,5 +124,6 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 print(len(fixations))
+write_tuples_to_csv(fixations,'out2.txt')
 #for fixation in fixations:
     #print(len(fixation))
