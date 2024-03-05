@@ -20,6 +20,7 @@ def calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_r
     return angular_threshold * sampling_rate
 
 
+
 def calculate_velocity(point1, point2):
     """Calculate velocity between two points."""
     dx = point2[1] - point1[1]
@@ -27,6 +28,27 @@ def calculate_velocity(point1, point2):
     dt = point2[0] - point1[0]
     velocity = np.sqrt(dx**2 + dy**2) / dt
     return velocity
+
+def average_velocity(points):
+    """Find the average velocity between consecutive points."""
+    if len(points) < 2:
+        return None  # Not enough points to calculate velocity
+
+    total_velocity = 0.0
+    count = 0
+
+    for i in range(len(points) - 1):
+        if (points[i][3] == 1 and points[i+1][3] == 2) or (points[i][3] == 2 and points[i+1][3] == 1):
+            velocity = calculate_velocity(points[i], points[i+1])
+            if velocity == 0.0:
+                continue
+            total_velocity += velocity
+            count += 1
+
+    if count == 0:
+        return 0.0  # No valid pairs of consecutive points
+
+    return total_velocity / count
 
 
 def i_vt(protocol, velocity_threshold):
@@ -62,8 +84,8 @@ def write_tuples_to_csv(tuples, filename):
         counter = 0
         for fixation in tuples:
             counter +=1
-            if len(fixation) < 2:
-                continue
+            #if len(fixation) < 2:
+                #continue
             #print(counter)
             file.write("\n")
             file.write("counter: " + str(counter))
@@ -77,11 +99,14 @@ def write_tuples_to_csv(tuples, filename):
 screen_resolution = (1680, 1050)  # Screen resolution in pixels (width x height)
 viewing_distance = 550  # Viewing distance in millimeters
 sampling_rate = 1000  # Sampling rate in Hz
-distance_threshold_pixels = 1  # Distance threshold in pixels
+distance_threshold_pixels = 0.3  # Distance threshold in pixels
 velocity_threshold = calculate_velocity_threshold(screen_resolution, viewing_distance, sampling_rate, distance_threshold_pixels)
 
 
 # Example usage:
-protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y']), axis=1)
-fixations = i_vt(protocol, velocity_threshold)
+protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+#print("Smallest velocity: " + str(smallest_velocity(protocol)))
+average = average_velocity(protocol)
+print("Average velocity: " + str(average))
+fixations = i_vt(protocol, 0.03)
 write_tuples_to_csv(fixations,'out.txt')

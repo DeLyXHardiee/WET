@@ -5,13 +5,13 @@ def extract_data(excel_file_path):
     df = pd.read_csv(excel_file_path, header=None, skiprows=1)
     # Assume all the data is stored in Column A
     timestamps = df[0]
-    print(timestamps)
+    #print(timestamps)
     x_values = df[1]
-    print(x_values)
+    #print(x_values)
     y_values = df[2]
-    print(y_values)
+    #print(y_values)
     labels = df[7]
-    print(labels)
+    #print(labels)
 
     # Create a new DataFrame with the extracted values
     extracted_data = pd.DataFrame({
