@@ -110,17 +110,9 @@ eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
 
-# We can get the same amount of fixations, but they don't match at all
-# First fixation matches precisely on the 7th point in the data. Second fixation is nowhere close, 100 ms apart
-# This seems to be because our algorithm skips short fixations. Decreasing the duration gives us too many fixations.
-# To capture the short fixations, the algorithm needs a duration threshold of 30-50.
-# Very often the beginning or end of a fixation in our data is part of a saccade in the original dataset.
 # Long fixations and eye drifting / smooth pursuits are a major issue. They often get separated into different fixations.
-# Something like duration 50 and dispersion 1.5 is pretty close in many situations.
-# 72 gets same amount of fixations with 1 dispersion
-duration_threshold = 50
-# 0.8 gets same amount of fixations with 100 duration
-dispersion_threshold = 1.5
+duration_threshold = 125
+dispersion_threshold = 0.8
 hz = 1000
 
 fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
