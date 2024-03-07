@@ -13,8 +13,6 @@ def check_for_nan(number):
 
 
 def measure_saccade_accuracy(true_data, predicted_data):
-    print(len(true_data))
-    print(len(predicted_data))
     if len(true_data) != len(predicted_data):
         raise ValueError("Length of true data and predicted data must be the same")
 
