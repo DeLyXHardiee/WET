@@ -126,6 +126,14 @@ def write_tuples_to_csv(tuples, filename):
                 file.write(str(data))
                 file.write("\n")
 
+def write_tuples_to_txt(tuples,filename):
+    with open(filename,'w') as file:
+        for data in tuples:
+            if (math.isnan(data[1])):
+                continue
+            file.write(str(data[0:3]))
+            file.write('\n')
+
 def measure_saccade_accuracy(true_data, predicted_data):
     print(len(true_data))
     print(len(predicted_data))
@@ -147,8 +155,8 @@ def measure_saccade_accuracy(true_data, predicted_data):
     accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
 
     return accuracy
-
-eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
+filepath = '../Datasets/Reading/S_1004_S2_TEX.csv'
+eye_tracking_data = extract_data(filepath)
 
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
@@ -163,8 +171,9 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 print("Fixations:")
 print(len(fixations))
 write_tuples_to_csv(fixations,'out2.txt')
+write_tuples_to_txt(fixations,'../out.txt')
 
-protocol = extract_data("S_1002_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+protocol = extract_data(filepath).apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 
 print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
 #for fixation in fixations:
