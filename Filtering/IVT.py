@@ -14,6 +14,8 @@ def check_for_nan(number):
 
 def measure_saccade_accuracy(true_data, predicted_data):
     if len(true_data) != len(predicted_data):
+        print("Length of true data: " + str(len(true_data)))
+        print("Length of predicted data: " + str(len(predicted_data)))
         raise ValueError("Length of true data and predicted data must be the same")
 
     # Extract saccade labels from true and predicted data
@@ -34,6 +36,8 @@ def measure_saccade_accuracy(true_data, predicted_data):
 
 def calculate_accuracy(true_labels, predicted_labels):
     if len(true_labels) != len(predicted_labels):
+        print("Length of true data: " + str(len(true_labels)))
+        print("Length of predicted data: " + str(len(predicted_labels)))
         raise ValueError("Length of true labels and predicted labels must be the same")
 
     total_points = len(true_labels)
@@ -169,6 +173,31 @@ def calculate_acceleration(point1, point2):
     acceleration = (velocity2 - velocity1) / dt2
     return acceleration
 
+def find_best_threshold(protocol):
+    # Define a range of possible velocity thresholds
+    threshold_range = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10]
+
+    best_threshold = 0.0
+    best_f1_score = 0.0
+    fixations = []
+    best_fixations = []
+
+    for threshold in threshold_range:
+        # Apply I-VT algorithm with current threshold to segment dataset
+        # ivt_output = apply_ivt_algorithm(dataset, threshold)
+
+        # Calculate F1 score using ground truth labels and ivt_output
+        fixations = i_vt_3(protocol, threshold)
+        f1_score = measure_saccade_accuracy(protocol, fixations)
+
+        # Update best threshold if F1 score is higher
+        if f1_score > best_f1_score:
+            best_threshold = threshold
+            best_f1_score = f1_score
+            best_fixations = fixations
+
+    return best_threshold, best_f1_score, calculate_accuracy(protocol, best_fixations)
+
 def write_tuples_to_csv(tuples, filename):
     #print(len(tuples))
     """Write tuples to a CSV file with row numbers."""
@@ -191,17 +220,14 @@ def write_tuples_to_csv(tuples, filename):
 # Example usage:
 #protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 #protocol = extract_data("S_1002_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-protocol = extract_data("S_1003_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+protocol = extract_data("../Datasets/RandomSaccades/S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 
-average = average_velocity(protocol)
-print("Average velocity: " + str(average))
+threshold, f1, total_accuracy = find_best_threshold(protocol)
+#write_tuples_to_csv(fixations,'out.txt')
 
-fixations = i_vt_3(protocol, average)
-
-write_tuples_to_csv(fixations,'out.txt')
-
-print("Total data accuracy: " + str(calculate_accuracy(protocol, fixations)))
-print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
+print("Best threshold: " + str(threshold))
+print("Saccade accuracy: " + str(f1))
+print("Total accuracy: " + str(total_accuracy))
 
 
 
