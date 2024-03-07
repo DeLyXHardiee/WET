@@ -44,25 +44,6 @@ def calculate_accuracy(true_labels, predicted_labels):
     accuracy = correct_predictions / total_points
     return accuracy
 
-def transform_tuples(list_of_lists):
-    transformed_list = []
-    for nested_list in list_of_lists:
-        if len(nested_list) == 1:
-                # If nested list has size 1, set fourth element of tuple to 2
-                transformed_tuples = [(t[0], t[1], t[2], 2) for t in nested_list]
-        else:
-            # If nested list has size > 1, set fourth element of all tuples to 1
-            transformed_tuples = [(t[0], t[1], t[2], 1) for t in nested_list]
-        transformed_list.append(transformed_tuples)
-    return transformed_list
-
-def flatten_nested_list(nested_list):
-    flattened_list = []
-    for sublist in nested_list:
-        for item in sublist:
-            flattened_list.append(item)
-    return flattened_list
-
 
 def calculate_velocity(point1, point2):
     """Calculate velocity between two points."""
@@ -72,7 +53,7 @@ def calculate_velocity(point1, point2):
     velocity = np.sqrt(dx**2 + dy**2) / dt
     return velocity
 
-
+""" Calculate the average velocity when a fixation goes to a saccade or the oppossite"""
 def average_velocity(points):
     """Find the average velocity between consecutive points."""
     if len(points) < 2:
@@ -84,7 +65,7 @@ def average_velocity(points):
     for i in range(len(points) - 1):
         if (points[i][3] == 1 and points[i+1][3] == 2 or points[i+1][3] == 1 and points[i][3] == 2):
             velocity = calculate_velocity(points[i], points[i+1])
-            if velocity == 0.0:
+            if velocity == 0.0 or check_for_nan(velocity):
                 continue
             total_velocity += velocity
             count += 1
@@ -94,9 +75,9 @@ def average_velocity(points):
 
     return total_velocity / count
 
-
+"""I-VT algorithm with fixation groups"""
 def i_vt(protocol, velocity_threshold):
-    """Implement I-VT algorithm with velocity and acceleration thresholds."""
+
     fixation_points = []
     current_group = []
 
@@ -119,36 +100,56 @@ def i_vt(protocol, velocity_threshold):
 
     return fixation_points
 
-def i_vt_2(protocol, velocity_threshold, acceleration_threshold):
-    """Implement I-VT algorithm with velocity and acceleration thresholds."""
+"""I-VT algorithm with recalculation of velocity threshold during analysis"""
+def i_vt_2(protocol, velocity_threshold, recalculate):
+
     fixations = []
     velocities = []
     velocity_sum = 0
+    counter = 0
     for i in range(len(protocol)):
         point = protocol[i]
-        if (point[3] == -1):
-            print("Iteration: " + str(i))
-            print("velocity sum: " + str(velocity_sum))
-            fixations.append((point[0], point[1], point[2], 1, 0))
-            velocities.append(0)
-            continue
         if len(fixations) == 0:
-            fixations.append((point[0], point[1], point[2], 1, 0))
+            fixations.append(point)
             velocities.append(0)
+            counter += 1
         else:
             velocity = calculate_velocity(fixations[-1], point)
-            acceleration = calculate_acceleration(fixations[-1], point)
-            if (i < 39):
+            if (check_for_nan(velocity)):
+                fixations.append(point)
+                continue
+            if (counter < recalculate):
                 velocities.append(velocity)
-            elif (i == 39):
+                counter += 1
+            elif (counter == recalculate):
                 velocities.append(velocity)
                 velocity_sum = sum(velocities)
-                velocity_threshold = velocity_sum / 40
-            elif (i > 39):
-                velocity_sum = velocity_sum - velocities[i % 40]
+                velocity_threshold = velocity_sum / recalculate
+                counter += 1
+            elif (counter > recalculate):
+                velocity_sum = velocity_sum - velocities[counter % recalculate]
                 velocity_sum = velocity_sum + velocity
-                velocities[i % 40] = velocity
-                velocity_threshold = velocity_sum / 40
+                velocities[i % recalculate] = velocity
+                velocity_threshold = velocity_sum / recalculate
+                counter += 1
+            if velocity < velocity_threshold:
+                fixations.append((point[0], point[1], point[2], 1))
+            else:
+                fixations.append((point[0], point[1], point[2], 2))
+    return fixations
+
+"""I-VT algorithm without fixation groups"""
+def i_vt_3(protocol, velocity_threshold):
+    fixations = []
+    for i in range(len(protocol)):
+        point = protocol[i]
+        if len(fixations) == 0:
+            fixations.append(point)
+        else:
+            velocity = calculate_velocity(fixations[-1], point)
+            if check_for_nan(velocity):
+                fixations.append(point)
+                continue
             if velocity < velocity_threshold:
                 fixations.append((point[0], point[1], point[2], 1))
             else:
@@ -169,21 +170,6 @@ def calculate_acceleration(point1, point2):
 
     acceleration = (velocity2 - velocity1) / dt2
     return acceleration
-
-def i_vt_acceleration(protocol, velocities, acceleration_threshold):
-    """Implement I-VT algorithm with velocity and acceleration thresholds."""
-    fixations = []
-    for i in range(len(protocol)):
-        point = protocol[i]
-        if len(fixations) == 0:
-            fixations.append((point[0], point[1], point[2], point[3], point[4]))
-        else:
-            acceleration = calculate_acceleration(velocities[i-1], velocities[i], 0.001)
-            if acceleration > acceleration_threshold:
-                fixations.append((point[0], point[1], point[2], 2))
-            else:
-                fixations.append(point)
-    return fixations
 
 def write_tuples_to_csv(tuples, filename):
     #print(len(tuples))
@@ -208,16 +194,14 @@ def write_tuples_to_csv(tuples, filename):
 #protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 #protocol = extract_data("S_1002_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 protocol = extract_data("S_1003_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-#print("Smallest velocity: " + str(smallest_velocity(protocol)))
+
 average = average_velocity(protocol)
 print("Average velocity: " + str(average))
-fixations = i_vt_2(protocol, average, 0)
 
-#fixations = i_vt(protocol, average)
-#fixations_vel = i_vt_acceleration(fixations, velocities, 20)
-#fixations = transform_tuples(fixations)
+fixations = i_vt_3(protocol, average)
+
 write_tuples_to_csv(fixations,'out.txt')
-#flattened_fixation = flatten_nested_list(fixations)
+
 print("Total data accuracy: " + str(calculate_accuracy(protocol, fixations)))
 print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
 
