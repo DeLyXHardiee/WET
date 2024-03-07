@@ -15,6 +15,23 @@ def calculate_centroid_distance(points):
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
 
+def Find_tresholds(eye_tracking_data):
+    min_duration = 10000
+    max_dispersion = 0
+    current_fixation = []
+    tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+    for i in range (0,int(len(tuple_values))):
+        if tuple_values[i][3] == 1:
+            current_fixation.append(tuple_values[i])
+        if (tuple_values[i][3] == 2) & (len(current_fixation) > 0):
+            if (len(current_fixation)) < min_duration:
+                min_duration = len(current_fixation)
+            if calculate_centroid_distance(current_fixation) > max_dispersion:
+                max_dispersion = calculate_centroid_distance(current_fixation)
+            current_fixation = []
+    print("min duration : " + str(min_duration))
+    print("max dispersion : " + str(max_dispersion))
+
 def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     fixations = []
     duration = 0
