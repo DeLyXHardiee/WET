@@ -1,10 +1,14 @@
 import math
 from ExtractDataFromCSV import extract_data
 
+subject = (0, 0, 55)
+
 def calculate_distance(x1, y1, x2, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 def calculate_centroid_distance(points):
+    if len(points) < 2:
+        return 0
     x_values = [point[1] for point in points]
     y_values = [point[2] for point in points]
     mean_x = sum(x_values) / len(x_values)
@@ -18,7 +22,10 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     num_fixations = 0
     current_fixation = []
     tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-    for i in range (0,int(len(tuple_values)/10)):
+    for i in range (0,int(len(tuple_values))):
+        #print(i)
+        if (tuple_values[i][3] == -1) | (tuple_values[i][3] == 0):
+            continue
         #print("tuple values: \n" + str(tuple_values[i]))
         if i > 0:
             if ((tuple_values[i-1][3] == 1) & (tuple_values[i][3] == 2)):
@@ -42,13 +49,12 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
                     current_fixation = [new_start]
                     duration = 0
                 else:
-                    current_fixation.reverse()
                     while calculate_centroid_distance(current_fixation) > dispersion_threshold:
-                        current_fixation.pop()
-                        duration += -1
-                    current_fixation.reverse()
+                        current_fixation.pop(0)
+                        duration -= 1
     print("num_fixations: "  + str(num_fixations))
     return fixations 
+
 '''
 eye_tracking_data = [
     (0, 100, 100),  # Timestamp, x-coordinate, y-coordinate
@@ -80,15 +86,39 @@ eye_tracking_data = [
     (2600, 510, 115)
 ]
 '''
-eye_tracking_data = extract_data('S_9016_S1_RAN.csv')
 
-duration_threshold = 120
-dispersion_threshold = 1
+def write_tuples_to_csv(tuples, filename):
+    #print(len(tuples))
+    """Write tuples to a CSV file with row numbers."""
+    with open(filename, 'w') as file:
+        counter = 0
+        for fixation in tuples:
+            counter +=1
+            if len(fixation) < 2:
+                continue
+            #print(counter)
+            file.write("\n")
+            file.write("counter: " + str(counter))
+            file.write("\n")
+            for data in fixation:
+                # Access depth value at this point
+                file.write(str(data))
+                file.write("\n")
+
+eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
+
+screen_display = (474, 297)  # Screen display (width x height)
+distance_from_screen = 550
+
+# Long fixations and eye drifting / smooth pursuits are a major issue. They often get separated into different fixations.
+duration_threshold = 125
+dispersion_threshold = 0.8
 hz = 1000
 
 fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 print(len(fixations))
+write_tuples_to_csv(fixations,'out2.txt')
 #for fixation in fixations:
     #print(len(fixation))
