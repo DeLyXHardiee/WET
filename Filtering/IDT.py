@@ -14,7 +14,24 @@ def calculate_centroid_distance(points):
     mean_x = sum(x_values) / len(x_values)
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
-    
+
+def Find_tresholds(eye_tracking_data):
+    min_duration = 10000
+    max_dispersion = 0
+    current_fixation = []
+    tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+    for i in range (0,int(len(tuple_values))):
+        if tuple_values[i][3] == 1:
+            current_fixation.append(tuple_values[i])
+        if (tuple_values[i][3] == 2) & (len(current_fixation) > 0):
+            if (len(current_fixation)) < min_duration:
+                min_duration = len(current_fixation)
+            if calculate_centroid_distance(current_fixation) > max_dispersion:
+                max_dispersion = calculate_centroid_distance(current_fixation)
+            current_fixation = []
+    print("min duration : " + str(min_duration))
+    print("max dispersion : " + str(max_dispersion))
+
 def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     fixations = []
     duration = 0
@@ -23,8 +40,9 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     current_fixation = []
     tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
     for i in range (0,int(len(tuple_values))):
-        #print(i)
-        if (tuple_values[i][3] == -1) | (tuple_values[i][3] == 0):
+        if (math.isnan(tuple_values[i][1])) | (math.isnan(tuple_values[i][2])):
+            point = tuple_values[i]
+            fixations.append((point[0], point[1], point[2], 0))
             continue
         #print("tuple values: \n" + str(tuple_values[i]))
         if i > 0:
@@ -40,17 +58,20 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
                 #print(dispersion_threshold)
                 isFixation = True
                 if i == len(eye_tracking_data) - 1:
-                    fixations.append(current_fixation)
+                    for point in current_fixation:
+                        fixations.append((point[0], point[1], point[2], 1))
             else:
                 if isFixation:
                     new_start = current_fixation.pop()
                     isFixation = False
-                    fixations.append(current_fixation)
+                    for point in current_fixation:
+                        fixations.append((point[0], point[1], point[2], 1))
                     current_fixation = [new_start]
                     duration = 0
                 else:
                     while calculate_centroid_distance(current_fixation) > dispersion_threshold:
-                        current_fixation.pop(0)
+                        point = current_fixation.pop(0)
+                        fixations.append((point[0], point[1], point[2], 2))
                         duration -= 1
     print("num_fixations: "  + str(num_fixations))
     return fixations 
@@ -94,8 +115,8 @@ def write_tuples_to_csv(tuples, filename):
         counter = 0
         for fixation in tuples:
             counter +=1
-            if len(fixation) < 2:
-                continue
+            #if len(fixation) < 2:
+                #continue
             #print(counter)
             file.write("\n")
             file.write("counter: " + str(counter))
@@ -105,14 +126,36 @@ def write_tuples_to_csv(tuples, filename):
                 file.write(str(data))
                 file.write("\n")
 
+def measure_saccade_accuracy(true_data, predicted_data):
+    print(len(true_data))
+    print(len(predicted_data))
+    if len(true_data) != len(predicted_data):
+        raise ValueError("Length of true data and predicted data must be the same")
+
+    # Extract saccade labels from true and predicted data
+    true_saccades = [point for point in true_data if point[3] == 2]
+    predicted_saccades = [point for point in predicted_data if point[3] == 2]
+
+    # Calculate intersection of true and predicted saccades
+    true_positives = sum(1 for point in predicted_saccades if point in true_saccades)
+
+    # Calculate precision and recall
+    precision = true_positives / len(predicted_saccades) if predicted_saccades else 0
+    recall = true_positives / len(true_saccades) if true_saccades else 0
+
+    # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
+    accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
+
+    return accuracy
+
 eye_tracking_data = extract_data('S_1002_S1_RAN.csv')
 
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
 
 # Long fixations and eye drifting / smooth pursuits are a major issue. They often get separated into different fixations.
-duration_threshold = 125
-dispersion_threshold = 0.8
+duration_threshold = 30
+dispersion_threshold = 0.5
 hz = 1000
 
 fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
@@ -120,5 +163,9 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 print("Fixations:")
 print(len(fixations))
 write_tuples_to_csv(fixations,'out2.txt')
+
+protocol = extract_data("S_1002_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+
+print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
 #for fixation in fixations:
     #print(len(fixation))
