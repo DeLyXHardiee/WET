@@ -126,6 +126,14 @@ def write_tuples_to_csv(tuples, filename):
                 file.write(str(data))
                 file.write("\n")
 
+def write_tuples_to_txt(tuples,filename):
+    with open(filename,'w') as file:
+        for data in tuples:
+            if (math.isnan(data[1])):
+                continue
+            file.write(str(data[0:3]))
+            file.write('\n')
+
 def measure_saccade_accuracy(true_data, predicted_data):
     print(len(true_data))
     print(len(predicted_data))
@@ -163,6 +171,7 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 print("Fixations:")
 print(len(fixations))
 write_tuples_to_csv(fixations,'out2.txt')
+write_tuples_to_txt(fixations,'../out.txt')
 
 protocol = extract_data(filepath).apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 

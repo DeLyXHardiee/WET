@@ -10,7 +10,7 @@ def extract_data(excel_file_path):
     #print(x_values)
     y_values = df[2]
     #print(y_values)
-    labels = df[7]
+    labels = df[5]
     #print(labels)
 
     # Create a new DataFrame with the extracted values

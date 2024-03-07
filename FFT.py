@@ -2,6 +2,7 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 
+lines = []
 with open('out.txt', 'r') as file:
     lines = file.readlines()
 
@@ -13,7 +14,6 @@ for line in lines:
         data.append(tuple(map(float, match[0])))
 
 data = np.array(data, dtype=[('timestamp', float), ('x', float), ('y', float)])
-
 time = data['timestamp']
 x = data['x']
 y = data['y']
