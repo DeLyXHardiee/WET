@@ -17,7 +17,10 @@ data = np.array(data, dtype=[('timestamp', float), ('x', float), ('y', float)])
 time = data['timestamp']
 x = data['x']
 y = data['y']
-
+arrayLength = 3000
+time = time[0:arrayLength]
+x = x[0:arrayLength]
+y = x[0:arrayLength]
 signal_to_analyze = x + 1j * y
 
 # Compute FFT
@@ -30,14 +33,14 @@ freq = np.fft.fftfreq(len(time), d=(time[1] - time[0]))
 plt.figure(figsize=(10, 6))
 # Plot the real part of the FFT result
 plt.subplot(2, 1, 1)
-plt.plot(freq, np.real(fft_result))
+plt.plot(np.real(fft_result))
 plt.title('Real Part of FFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
 
 # Plot the imaginary part of the FFT result
 plt.subplot(2, 1, 2)
-plt.plot(freq, np.imag(fft_result))
+plt.plot(np.imag(fft_result))
 plt.title('Imaginary Part of FFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
