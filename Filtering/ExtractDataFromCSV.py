@@ -20,6 +20,6 @@ def extract_data(excel_file_path):
         'y': y_values,
         'lab': labels
     })
-    return extracted_data
+    return extracted_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 
 #print(extract_data('S_9016_S1_RAN.csv'))

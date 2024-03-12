@@ -38,16 +38,16 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     isFixation = False
     num_fixations = 0
     current_fixation = []
-    tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+    tuple_values = eye_tracking_data#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
     for i in range (0,int(len(tuple_values))):
         if (math.isnan(tuple_values[i][1])) | (math.isnan(tuple_values[i][2])):
             point = tuple_values[i]
             fixations.append((point[0], point[1], point[2], 0))
             continue
         #print("tuple values: \n" + str(tuple_values[i]))
-        if i > 0:
-            if ((tuple_values[i-1][3] == 1) & (tuple_values[i][3] == 2)):
-                num_fixations += 1
+        #if i > 0:
+        #    if ((tuple_values[i-1][3] == 1) & (tuple_values[i][3] == 2)):
+        #        num_fixations += 1
         current_fixation.append(tuple_values[i])
         duration += 1
         #print(duration)
@@ -131,12 +131,18 @@ def write_tuples_to_txt(tuples,filename):
         for data in tuples:
             if (math.isnan(data[1])):
                 continue
-            file.write(str(data[0:3]))
+            file.write(str(data[0:4]))
             file.write('\n')
 
+def read_tuples_from_txt(filename):
+    result = []
+    with open(filename, 'r') as file:
+        for line in file:
+            current_tuple = eval(line.strip())
+            result.append(current_tuple)
+    return result
+
 def measure_saccade_accuracy(true_data, predicted_data):
-    print(len(true_data))
-    print(len(predicted_data))
     if len(true_data) != len(predicted_data):
         raise ValueError("Length of true data and predicted data must be the same")
 
@@ -145,7 +151,13 @@ def measure_saccade_accuracy(true_data, predicted_data):
     predicted_saccades = [point for point in predicted_data if point[3] == 2]
 
     # Calculate intersection of true and predicted saccades
-    true_positives = sum(1 for point in predicted_saccades if point in true_saccades)
+    true_positives = 0
+    for point in predicted_saccades:
+        for true_point in true_saccades:
+            if (point[0] == true_point[0]) & (point[3] == true_point[3]):
+                true_positives += 1
+                continue
+    #true_positives = sum(1 for point in predicted_saccades if point in true_saccades)
 
     # Calculate precision and recall
     precision = true_positives / len(predicted_saccades) if predicted_saccades else 0
@@ -156,7 +168,8 @@ def measure_saccade_accuracy(true_data, predicted_data):
 
     return accuracy
 filepath = '../Datasets/Reading/S_1004_S2_TEX.csv'
-eye_tracking_data = extract_data(filepath)
+eye_tracking_data = read_tuples_from_txt('../IDT_watermarked_S_1004_S2_TEX.txt')#extract_data(filepath)
+#eye_tracking_data = extract_data(filepath)
 
 screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
@@ -170,11 +183,10 @@ fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
 
 print("Fixations:")
 print(len(fixations))
-write_tuples_to_csv(fixations,'out2.txt')
-write_tuples_to_txt(fixations,'../out.txt')
+write_tuples_to_txt(fixations,'../IDT_out_watermarked_S_1004_S2_TEX.txt')
 
-protocol = extract_data(filepath).apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-
+protocol = read_tuples_from_txt('../IDT_out_S_1004_S2_TEX.txt')
+#protocol = extract_data(filepath)#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
 #for fixation in fixations:
     #print(len(fixation))

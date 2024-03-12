@@ -220,7 +220,7 @@ def write_tuples_to_csv(tuples, filename):
 # Example usage:
 #protocol = extract_data("S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 #protocol = extract_data("S_1002_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-protocol = extract_data("../Datasets/RandomSaccades/S_9016_S1_RAN.csv").apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+protocol = extract_data("../Datasets/RandomSaccades/S_9016_S1_RAN.csv")#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 
 threshold, f1, total_accuracy = find_best_threshold(protocol)
 #write_tuples_to_csv(fixations,'out.txt')
