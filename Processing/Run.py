@@ -57,7 +57,7 @@ def run():
     #format example: IDT ../Datasets/Reading/S_1004_S2_TEX.csv 100 0.5
     #format example: WIDT ../Datasets/Reading/S_1004_S2_TEX.csv 100 0.5
     #format example: IVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03
-    #format example: WIDT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03 
+    #format example: WIVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03 
     mode = sys.argv[1]
     match mode:
         case 'IDT':
