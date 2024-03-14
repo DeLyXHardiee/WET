@@ -56,7 +56,7 @@ def revert_from_complex_numbers(slice,slicesize,data,i):
     points = []
     for j in range(0,len(slice)):
             #print(i*slicesize+j)
-            points.append((data[i*slicesize+j][0],slice[j].real,slice[j].imag))
+            points.append((data[i*slicesize+j][0],slice[j].real,slice[j].imag, int(data[i*slicesize+j][3])))
     return points
 
 def plot_data(watermarked_data, data):
@@ -90,10 +90,9 @@ def plot_data(watermarked_data, data):
     plt.show()    
 
 
-def run(fileIn, fileOut):
+def run_watermark(data):
     sliceSize = 16
     strength = 0.0003
-    data = read_tuples_from_txt(fileIn)
     complex_transformation = get_complex_transformation(data)
     slices = get_slices(complex_transformation,sliceSize)
     watermarked_data = []
@@ -107,4 +106,4 @@ def run(fileIn, fileOut):
         reverted_ifft = revert_from_complex_numbers(ifft,sliceSize,data,i)
         for i in reverted_ifft:
             watermarked_data.append(i)
-    write_tuples_to_txt(watermarked_data, fileOut)
+    return watermarked_data

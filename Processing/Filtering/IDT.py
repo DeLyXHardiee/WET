@@ -1,6 +1,4 @@
 import math
-import CSVUtility
-from Processing.Embed_watermark import run
 
 subject = (0, 0, 55)
 
@@ -45,10 +43,6 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
             point = tuple_values[i]
             fixations.append((point[0], point[1], point[2], 0))
             continue
-        #print("tuple values: \n" + str(tuple_values[i]))
-        #if i > 0:
-        #    if ((tuple_values[i-1][3] == 1) & (tuple_values[i][3] == 2)):
-        #        num_fixations += 1
         current_fixation.append(tuple_values[i])
         duration += 1
         #print(duration)
@@ -74,77 +68,13 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
                         point = current_fixation.pop(0)
                         fixations.append((point[0], point[1], point[2], 2))
                         duration -= 1
-    print("num_fixations: "  + str(num_fixations))
     return fixations 
 
-def write_tuples_to_txt(tuples,filename):
-    with open(filename,'w') as file:
-        for data in tuples:
-            if (math.isnan(data[1])):
-                continue
-            file.write(str(data[0:4]))
-            file.write('\n')
-
-def read_tuples_from_txt(filename):
-    result = []
-    with open(filename, 'r') as file:
-        for line in file:
-            current_tuple = eval(line.strip())
-            result.append(current_tuple)
-    return result
-
-def measure_saccade_accuracy(true_data, predicted_data):
-    if len(true_data) != len(predicted_data):
-        raise ValueError("Length of true data and predicted data must be the same")
-
-    # Extract saccade labels from true and predicted data
-    true_saccades = [point for point in true_data if point[3] == 2]
-    predicted_saccades = [point for point in predicted_data if point[3] == 2]
-
-    # Calculate intersection of true and predicted saccades
-    true_positives = 0
-    for point in predicted_saccades:
-        for true_point in true_saccades:
-            if (point[0] == true_point[0]) & (point[3] == true_point[3]):
-                true_positives += 1
-                continue
-    #true_positives = sum(1 for point in predicted_saccades if point in true_saccades)
-
-    # Calculate precision and recall
-    precision = true_positives / len(predicted_saccades) if predicted_saccades else 0
-    recall = true_positives / len(true_saccades) if true_saccades else 0
-
-    # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
-    accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
-
-    return accuracy
-
-def run_IDT_original_data(filepath, duration_threshold=30, dispersion_threshold=0.5):
-    eye_tracking_data = CSVUtility.extract_original_data(filepath)
-    return IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
-
-def run_IDT(filepath, duration_threshold=30, dispersion_threshold=0.5):
-    eye_tracking_data = CSVUtility.extract_original_data(filepath)
-    return IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
-
-filepath = '../Datasets/Reading/S_1004_S2_TEX.csv'
-eye_tracking_data = read_tuples_from_txt('../IDT_watermarked_S_1004_S2_TEX.txt')#extract_data(filepath)
-#eye_tracking_data = extract_data(filepath)
-
-screen_display = (474, 297)  # Screen display (width x height)
+""" screen_display = (474, 297)  # Screen display (width x height)
 distance_from_screen = 550
 
 # Long fixations and eye drifting / smooth pursuits are a major issue. They often get separated into different fixations.
 duration_threshold = 30
 dispersion_threshold = 0.5
 hz = 1000
-
-fixations = IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
-
-print("Fixations:")
-print(len(fixations))
-write_tuples_to_txt(fixations,'../IDT_out_watermarked_S_1004_S2_TEX.txt')
-
-protocol = read_tuples_from_txt('../IDT_out_S_1004_S2_TEX.txt')
-#protocol = extract_data(filepath)#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
+ """
