@@ -24,7 +24,7 @@ def run_IDT(fileIn, duration_threshold=30, dispersion_threshold=0.5):
 def run_IVT(fileIn, velocity_threshold=0):
     eye_tracking_data = csvu.extract_data(fileIn)
     result = ivt.IVT(eye_tracking_data, velocity_threshold)
-    outFile = name_file(fileIn,'IVT',IDT_location)
+    outFile = name_file(fileIn,'IVT',IVT_location)
     csvu.write_data(outFile, result)
     return result,outFile
 
@@ -43,7 +43,7 @@ def run_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0
 
 def run_IVT_with_watermark(fileIn, velocity_treshold=0):
     original_ivt_data,IVTFile = run_IVT(fileIn,velocity_treshold)
-    _,watermarkedFile = run_embed_watermark(IVTFile, WIDT_location)
+    _,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location)
     watermarked_ivt_data,_ = run_IVT(watermarkedFile,velocity_treshold)
     print(an.measure_saccade_accuracy(original_ivt_data, watermarked_ivt_data))
 
