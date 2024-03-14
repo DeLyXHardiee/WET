@@ -60,13 +60,6 @@ def revert_from_complex_numbers(slice,slicesize,data,i):
     return points
 
 def plot_data(watermarked_data, data):
-    """
-    Plot two sets of data with different colors.
-
-    Parameters:
-    - watermarked_data: Tuple (time, x, y) representing the watermarked data.
-    - data: Tuple (time, x, y) representing the original data.
-    """
     x_w = []
     y_w = []
     x = []
@@ -97,15 +90,13 @@ def plot_data(watermarked_data, data):
     plt.show()    
 
 
-def run():
+def run(fileIn, fileOut):
     sliceSize = 16
     strength = 0.0003
-    data = read_tuples_from_txt('IDT_out_S_1004_S2_TEX.txt')
+    data = read_tuples_from_txt(fileIn)
     complex_transformation = get_complex_transformation(data)
     slices = get_slices(complex_transformation,sliceSize)
-    #print(len(slices))
     watermarked_data = []
-    #print(slices)
     for i in range (0,len(slices)):
         if len(slices[i])<1:
             continue
@@ -116,36 +107,4 @@ def run():
         reverted_ifft = revert_from_complex_numbers(ifft,sliceSize,data,i)
         for i in reverted_ifft:
             watermarked_data.append(i)
-    write_tuples_to_txt(watermarked_data,'IDT_watermarked_S_1004_S2_TEX.txt')
-    #print(watermarked_data)
-
-
-
-run()
-
-
-# Compute FFT
-'''
-fft_result = np.fft.fft(get_data_from_txt)
-
-# Compute the frequencies corresponding to the FFT result
-#freq = np.fft.fftfreq(len(time), d=(time[1] - time[0]))
-
-# Plot the results
-plt.figure(figsize=(10, 6))
-# Plot the real part of the FFT result
-plt.subplot(2, 1, 1)
-plt.plot(np.real(fft_result))
-plt.title('Real Part of FFT')
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('Amplitude')
-
-# Plot the imaginary part of the FFT result
-plt.subplot(2, 1, 2)
-plt.plot(np.imag(fft_result))
-plt.title('Imaginary Part of FFT')
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('Amplitude')
-
-plt.tight_layout()
-plt.show()'''
+    write_tuples_to_txt(watermarked_data, fileOut)

@@ -1,6 +1,5 @@
 import numpy as np
-import csv
-from ExtractDataFromCSV import extract_data
+import CSVUtility
 import numpy as np
 
 import math

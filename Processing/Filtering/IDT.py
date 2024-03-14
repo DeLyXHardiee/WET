@@ -1,5 +1,6 @@
 import math
-from ExtractDataFromCSV import extract_data
+import CSVUtility
+from Processing.Embed_watermark import run
 
 subject = (0, 0, 55)
 
@@ -15,7 +16,7 @@ def calculate_centroid_distance(points):
     mean_y = sum(y_values) / len(y_values)
     return max(calculate_distance(mean_x, mean_y, point[1], point[2]) for point in points)
 
-def Find_tresholds(eye_tracking_data):
+def find_tresholds(eye_tracking_data):
     min_duration = 10000
     max_dispersion = 0
     current_fixation = []
@@ -76,56 +77,6 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     print("num_fixations: "  + str(num_fixations))
     return fixations 
 
-'''
-eye_tracking_data = [
-    (0, 100, 100),  # Timestamp, x-coordinate, y-coordinate
-    (100, 105, 102),
-    (200, 110, 98),
-    (300, 115, 95),
-    (400, 117, 94),
-    (500, 120, 90),
-    (600, 125, 87),
-    (700, 130, 85),
-    (800, 135, 82),
-    (900, 140, 80),
-    (1000, 145, 78),
-    (1100, 350, 75),
-    (1200, 355, 73),
-    (1300, 360, 70),
-    (1400, 365, 68),
-    (1500, 370, 65),
-    (1600, 375, 63),
-    (1700, 380, 60),
-    (1800, 385, 58),
-    (1900, 390, 55),
-    (2000, 2500, -1500),
-    (2100, 2505, -1502),
-    (2200, 2510, -1504),
-    (2300, 2515, -1506),
-    (2400, 2520, -1508),
-    (2500, 400, 100),
-    (2600, 510, 115)
-]
-'''
-
-def write_tuples_to_csv(tuples, filename):
-    #print(len(tuples))
-    """Write tuples to a CSV file with row numbers."""
-    with open(filename, 'w') as file:
-        counter = 0
-        for fixation in tuples:
-            counter +=1
-            #if len(fixation) < 2:
-                #continue
-            #print(counter)
-            file.write("\n")
-            file.write("counter: " + str(counter))
-            file.write("\n")
-            for data in fixation:
-                # Access depth value at this point
-                file.write(str(data))
-                file.write("\n")
-
 def write_tuples_to_txt(tuples,filename):
     with open(filename,'w') as file:
         for data in tuples:
@@ -167,6 +118,15 @@ def measure_saccade_accuracy(true_data, predicted_data):
     accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
 
     return accuracy
+
+def run_IDT_original_data(filepath, duration_threshold=30, dispersion_threshold=0.5):
+    eye_tracking_data = CSVUtility.extract_original_data(filepath)
+    return IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
+
+def run_IDT(filepath, duration_threshold=30, dispersion_threshold=0.5):
+    eye_tracking_data = CSVUtility.extract_original_data(filepath)
+    return IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
+
 filepath = '../Datasets/Reading/S_1004_S2_TEX.csv'
 eye_tracking_data = read_tuples_from_txt('../IDT_watermarked_S_1004_S2_TEX.txt')#extract_data(filepath)
 #eye_tracking_data = extract_data(filepath)
@@ -188,5 +148,3 @@ write_tuples_to_txt(fixations,'../IDT_out_watermarked_S_1004_S2_TEX.txt')
 protocol = read_tuples_from_txt('../IDT_out_S_1004_S2_TEX.txt')
 #protocol = extract_data(filepath)#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 print("Saccade accuracy: " + str(measure_saccade_accuracy(protocol, fixations)))
-#for fixation in fixations:
-    #print(len(fixation))
