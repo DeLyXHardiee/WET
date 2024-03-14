@@ -63,7 +63,7 @@ def run():
             else:
                 run_IDT(sys.argv[2])
         case 'IVT':
-            if len(sys.argv) == 5:
+            if len(sys.argv) == 4:
                 run_IVT(sys.argv[2],float(sys.argv[3]))
             else:
                 run_IVT(sys.argv[2])
@@ -73,7 +73,7 @@ def run():
             else:
                 run_IDT_with_watermark(sys.argv[2])
         case 'WIVT':
-            if len(sys.argv) == 5:
+            if len(sys.argv) == 4:
                 run_IVT_with_watermark(sys.argv[2],float(sys.argv[3]))
             else:
                 run_IVT_with_watermark(sys.argv[2])
