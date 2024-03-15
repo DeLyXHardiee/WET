@@ -1,0 +1,65 @@
+S_1004_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.878797369245224
+    Total accuracy: 0.9804985726614884
+
+
+S_1005_S1_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8784178590156566
+    Total accuracy: 0.9723240803729944
+
+S_1005_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8698370171913372
+    Total accuracy: 0.970125473013344
+
+S_1007_S1_TEX.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.848722286528359
+    Total accuracy: 0.9716949827448899
+
+S_1007_S2_TEX.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.8234376354338216
+    Total accuracy: 0.9660701835928422
+
+S_1008_S1_TEX.csv
+    Best threshold: 0.04
+    Saccade accuracy: 0.846475341320702
+    Total accuracy: 0.9724412716858969
+
+S_1008_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8416223160212883
+    Total accuracy: 0.9712834473142553
+
+S_1009_S1_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8202422028279549
+    Total accuracy: 0.9556119739811496
+
+S_1009_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8233755424766662
+    Total accuracy: 0.9503892180783083
+
+S_1010_S1_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.7995855727514085
+    Total accuracy: 0.9480256720675302
+
+S_1010_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.7943778628349125
+    Total accuracy: 0.944466580336687
+
+S_1011_S1_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.847457627118644
+    Total accuracy: 0.9701717984895012
+
+S_1011_S2_TEX.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8619064245810056
+    Total accuracy: 0.9731389866525002

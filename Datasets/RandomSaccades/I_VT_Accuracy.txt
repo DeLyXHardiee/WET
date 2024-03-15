@@ -1,0 +1,89 @@
+S_1002_S1_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8606489184692181
+    Total accuracy: 0.9801182637538377
+
+S_1003_S1_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.87656064629117
+    Total accuracy: 0.9783350308016335
+
+S_1003_S2_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8751211171273866
+    Total accuracy: 0.9781759183229292
+
+S_1004_S1_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.9023902908310516
+    Total accuracy: 0.9868523886311249
+
+S_1004_S2_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8941108210037714
+    Total accuracy: 0.9851596818235783
+
+S_1005_S1_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8931278032685467
+    Total accuracy: 0.9790848379915904
+
+S_1005_S2_RAN.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.9034695980762625
+    Total accuracy: 0.9800741656365883
+
+S_1007_S1_RAN.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.8893720424606728
+    Total accuracy: 0.982816271615686
+
+S_1007_S2_RAN.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.8723756203079273
+    Total accuracy: 0.9800833077737432
+
+S_1008_S1_RAN.csv
+    Best threshold: 0.04
+    Saccade accuracy: 0.8636807817589577
+    Total accuracy: 0.9834234518688084
+
+S_1008_S2_RAN.csv
+    Best threshold: 0.04
+    Saccade accuracy: 0.8551347130027334
+    Total accuracy: 0.9815241352721953
+
+S_1009_S1_RAN.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.8611655239960823
+    Total accuracy: 0.9649952509102422
+
+S_1009_S2_RAN.csv
+    Best threshold: 0.06
+    Saccade accuracy: 0.8425388195559947
+    Total accuracy: 0.9612850245369637
+
+S_1010_S1_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8428010226351562
+    Total accuracy: 0.9749708157733326
+
+S_1010_S2_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.8409360374414977
+    Total accuracy: 0.9746347061325841
+
+S_1011_S1_RAN.csv
+    Best threshold: 0.08
+    Saccade accuracy: 0.8478441924530719
+    Total accuracy: 0.9764674487788968
+
+S_1011_S2_RAN.csv
+    Best threshold: 0.05
+    Saccade accuracy: 0.9011910013233347
+    Total accuracy: 0.9865847505416555
+
+S_9016_S1_RAN.csv
+    Best threshold: 0.04
+    Saccade accuracy: 0.8272034337304818
+    Total accuracy: 0.9768592261345311
