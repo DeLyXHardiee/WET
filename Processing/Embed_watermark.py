@@ -43,6 +43,11 @@ def embed_watermark(fft,watermark,strength):
     modified_amplitudes = np.add((watermark*strength),amplitudes)
     return modified_amplitudes * np.exp(1j * np.angle(fft))
 
+def extract_watermark(original_fft, watermark_fft, strenght):
+    original_amplitudes = np.abs(original_fft)
+    watermark_amplitudes = np.abs(watermark_fft)
+    return (watermark_amplitudes - original_amplitudes)/strenght
+
 def get_IFFT(fft):
     return np.fft.ifft(fft)
 
@@ -90,20 +95,48 @@ def plot_data(watermarked_data, data):
     plt.show()    
 
 
-def run_watermark(data):
-    sliceSize = 16
-    strength = 0.0003
+def run_watermark(data, sliceSize, strength):
+    #sliceSize = 16
+    #strength = 0.0003
     complex_transformation = get_complex_transformation(data)
     slices = get_slices(complex_transformation,sliceSize)
     watermarked_data = []
+    watermark = []
     for i in range (0,len(slices)):
         if len(slices[i])<1:
             continue
-        watermark = generate_watermark(len(slices[i]))
+        watermark_slice = generate_watermark(len(slices[i]))
+        watermark.append(watermark_slice)
         fft = get_FFT(slices[i])
         embedded_data = embed_watermark(fft,watermark,strength)
         ifft = get_IFFT(embedded_data)
         reverted_ifft = revert_from_complex_numbers(ifft,sliceSize,data,i)
         for i in reverted_ifft:
             watermarked_data.append(i)
-    return watermarked_data
+    return watermarked_data, watermark
+
+def unrun_watermark(watermarked_data, original_data, sliceSize, strength):
+    if len(watermarked_data) != len(original_data):
+        raise ValueError("Length of true data and predicted data must be the same")
+    complex_transformation_original = get_complex_transformation(original_data)
+    complex_transformation_watermark = get_complex_transformation(watermarked_data)
+    original_slices = get_slices(complex_transformation_original, sliceSize)
+    watermark_slices = get_slices(complex_transformation_watermark, sliceSize)
+    extracted_watermark = []
+    for i in range (0,len(original_slices)):
+        if len(original_slices[i])<1:
+            continue
+        original_fft = get_FFT(original_slices[i])
+        watermark_fft = get_FFT(watermark_slices[i])
+        watermark = extract_watermark(original_fft, watermark_fft, strength)
+        extracted_watermark.append(watermark)
+    return extracted_watermark
+
+def watermark_embedding_and_extraction_test(data, slicesize, strength):
+    watermarked_data, watermark = run_watermark(data, slicesize, strength)
+    extracted_watermark = unrun_watermark(watermarked_data, data, slicesize, strength)
+    for i in range(len(watermarked_data)-1):
+        for j in range(slicesize-1):
+            if (watermark[i][j] != extracted_watermark[i][j]):
+                raise ValueError("Original watermark and extracted watermark is not the same")
+    print("WEEEEEEEEE")
