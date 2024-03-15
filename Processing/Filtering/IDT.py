@@ -1,4 +1,5 @@
 import math
+""" import CSVUtility """
 
 subject = (0, 0, 55)
 
@@ -18,11 +19,11 @@ def find_tresholds(eye_tracking_data):
     min_duration = 10000
     max_dispersion = 0
     current_fixation = []
-    tuple_values = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-    for i in range (0,int(len(tuple_values))):
-        if tuple_values[i][3] == 1:
-            current_fixation.append(tuple_values[i])
-        if (tuple_values[i][3] == 2) & (len(current_fixation) > 0):
+    eye_tracking_data = eye_tracking_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+    for i in range (0,int(len(eye_tracking_data))):
+        if eye_tracking_data[i][3] == 1:
+            current_fixation.append(eye_tracking_data[i])
+        if (eye_tracking_data[i][3] == 2) & (len(current_fixation) > 0):
             if (len(current_fixation)) < min_duration:
                 min_duration = len(current_fixation)
             if calculate_centroid_distance(current_fixation) > max_dispersion:
@@ -35,15 +36,16 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     fixations = []
     duration = 0
     isFixation = False
-    num_fixations = 0
     current_fixation = []
-    tuple_values = eye_tracking_data#.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
-    for i in range (0,int(len(tuple_values))):
-        if (math.isnan(tuple_values[i][1])) | (math.isnan(tuple_values[i][2])):
-            point = tuple_values[i]
-            fixations.append((point[0], point[1], point[2], 0))
+    for i in range (0,int(len(eye_tracking_data))):
+        if (math.isnan(eye_tracking_data[i][1])) | (math.isnan(eye_tracking_data[i][2])):
+            for point in current_fixation:                
+                fixations.append((point[0], point[1], point[2], 1))
+            current_fixation = []
+            point = eye_tracking_data[i]
+            fixations.append(point)
             continue
-        current_fixation.append(tuple_values[i])
+        current_fixation.append(eye_tracking_data[i])
         duration += 1
         #print(duration)
         if duration >= duration_threshold:
@@ -68,6 +70,10 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
                         point = current_fixation.pop(0)
                         fixations.append((point[0], point[1], point[2], 2))
                         duration -= 1
+        else:
+            if i == len(eye_tracking_data) - 1:
+                    for point in current_fixation:
+                        fixations.append((point[0], point[1], point[2], 2))
     return fixations 
 
 """ screen_display = (474, 297)  # Screen display (width x height)
@@ -78,3 +84,8 @@ duration_threshold = 30
 dispersion_threshold = 0.5
 hz = 1000
  """
+
+""" data = CSVUtility.extract_data("../../Datasets/Reading/S_1004_S2_TEX.csv")
+fixations = IDT(data, 100, 0.5)
+print(len(data))
+print(len(fixations)) """

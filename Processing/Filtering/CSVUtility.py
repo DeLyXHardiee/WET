@@ -19,5 +19,6 @@ def extract_data(csv_file_path):
     return extracted_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
 
 def write_data(csv_filename, data):
+    print(str(csv_filename) + str(len(data)))
     df = pd.DataFrame(data, columns=['n', 'x', 'y', 'lab'])
     df.to_csv(csv_filename, index=False)
