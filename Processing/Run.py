@@ -16,7 +16,9 @@ WIVT_location = 'ProcessedDatasets/WIVT/'
 
 def run_IDT(fileIn, duration_threshold=30, dispersion_threshold=0.5):
     eye_tracking_data = csvu.extract_data(fileIn)
+    print("eye tracking data size: " + str(len(eye_tracking_data)))
     result = idt.IDT(eye_tracking_data, duration_threshold, dispersion_threshold)
+    print("result size: " + str(len(result)))
     outFile = name_file(fileIn,'IDT',IDT_location)
     csvu.write_data(outFile, result)
     return result,outFile
