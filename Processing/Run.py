@@ -32,20 +32,20 @@ def run_IVT(fileIn, velocity_threshold=0):
 
 def run_embed_watermark(fileIn, outFolder):
     data = csvu.extract_data(fileIn)
-    result = ew.run_watermark(data)
+    result,watermark = ew.run_watermark(data)
     outFile = name_file(fileIn,'WM',outFolder)
     csvu.write_data(outFile, result)
-    return result,outFile
+    return result,watermark,outFile
 
 def run_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5):
     original_idt_data,IDTFile = run_IDT(fileIn, duration_threshold, dispersion_threshold)
-    _,watermarkedFile = run_embed_watermark(IDTFile, WIDT_location)
+    _,watermark,watermarkedFile = run_embed_watermark(IDTFile, WIDT_location)
     watermarked_idt_data,_ = run_IDT(watermarkedFile,duration_threshold,dispersion_threshold)
     print(an.measure_saccade_accuracy(original_idt_data, watermarked_idt_data))    
 
 def run_IVT_with_watermark(fileIn, velocity_treshold=0):
     original_ivt_data,IVTFile = run_IVT(fileIn,velocity_treshold)
-    _,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location)
+    _,watermark,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location)
     watermarked_ivt_data,_ = run_IVT(watermarkedFile,velocity_treshold)
     print(an.measure_saccade_accuracy(original_ivt_data, watermarked_ivt_data))
 

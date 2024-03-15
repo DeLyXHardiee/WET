@@ -43,14 +43,14 @@ def get_FFT(complex_transformation):
 
 def embed_watermark(fft,watermark,strength):
     amplitudes = np.abs(fft)
-    modified_amplitudes = np.add((watermark*strength),amplitudes)
+    modified_amplitudes = np.add(np.multiply(watermark,strength),amplitudes)
     return modified_amplitudes * np.exp(1j * np.angle(fft))
 
-def extract_watermark(original_fft, watermark_fft, strenght):
+def extract_watermark(original_fft, watermark_fft, strength):
     original_amplitudes = np.abs(original_fft)
-    print(original_amplitudes)
+    #print(original_amplitudes)
     watermark_amplitudes = np.abs(watermark_fft)
-    return (watermark_amplitudes - original_amplitudes)/strenght
+    return np.round(np.divide(np.subtract(watermark_amplitudes, original_amplitudes),strength))
 
 def get_IFFT(fft):
     return np.fft.ifft(fft)
@@ -99,9 +99,9 @@ def plot_data(watermarked_data, data):
     plt.show()    
 
 
-def run_watermark(data):
+def run_watermark(data, strength = 0.0003):
     sliceSize = 16
-    strength = 0.0003
+    #strength = 0.0003
     complex_transformation = get_complex_transformation(data)
     slices = get_slices(complex_transformation,sliceSize)
     watermarked_data = []
@@ -124,7 +124,7 @@ def unrun_watermark(watermarked_data, original_data, sliceSize, strength):
         raise ValueError("Length of true data and predicted data must be the same")
     complex_transformation_original = get_complex_transformation(original_data)
     complex_transformation_watermark = get_complex_transformation(watermarked_data)
-    original_slices = get_slices(complex_transformation_original, sliceSize)
+    original_slices = get_slices(complex_transformation_original, sliceSize)    
     watermark_slices = get_slices(complex_transformation_watermark, sliceSize)
     extracted_watermark = []
     for i in range (0,len(original_slices)):
@@ -137,8 +137,9 @@ def unrun_watermark(watermarked_data, original_data, sliceSize, strength):
     return extracted_watermark
 
 def watermark_embedding_and_extraction_test(data, slicesize, strength):
-    watermarked_data, watermark = run_watermark(data)
+    watermarked_data, watermark = run_watermark(data, strength)
     extracted_watermark = unrun_watermark(watermarked_data, data, slicesize, strength)
+    print(len(watermark),len(extracted_watermark))
     for i in range(len(watermarked_data)-1):
         for j in range(slicesize-1):
             if math.isnan(watermark[i][j]) | math.isnan(extracted_watermark[i][j]):
@@ -146,11 +147,13 @@ def watermark_embedding_and_extraction_test(data, slicesize, strength):
                 #print(extracted_watermark[i])
                 continue
             if round(watermark[i][j]) != round(extracted_watermark[i][j]):
-                #print(int(watermark[i][j]))
-                #print(int(extracted_watermark[i][j]))
+                print(j)
+                print(round(watermark[i][j]), round(extracted_watermark[i][j]))
+                print(watermark[i])
+                print(extracted_watermark[i])
                 raise ValueError("Original watermark and extracted watermark is not the same")
     print("WEEEEEEEEE")
 
-data = csvu.extract_data("../Datasets/Reading/S_1004_S2_TEX.csv")
-watermark_embedding_and_extraction_test(data, 16, 0.0003)
+#data = csvu.extract_data("ProcessedDatasets/IDT/S_1004_S2_TEX_IDT.csv")
+#watermark_embedding_and_extraction_test(data, 16, 1)
 
