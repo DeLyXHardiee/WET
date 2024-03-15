@@ -39,11 +39,11 @@ def IDT(eye_tracking_data, duration_threshold, dispersion_threshold):
     current_fixation = []
     for i in range (0,int(len(eye_tracking_data))):
         if (math.isnan(eye_tracking_data[i][1])) | (math.isnan(eye_tracking_data[i][2])):
-            for point in current_fixation:                
-                fixations.append((point[0], point[1], point[2], 1))
-            current_fixation = []
-            point = eye_tracking_data[i]
-            fixations.append(point)
+            #for point in current_fixation:
+                #fixations.append((point[0], point[1], point[2], 1))
+            #current_fixation = []
+            #point = eye_tracking_data[i]
+            #fixations.append(point)
             continue
         current_fixation.append(eye_tracking_data[i])
         duration += 1

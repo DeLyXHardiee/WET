@@ -42,7 +42,7 @@ def IVT(protocol, velocity_threshold=0):
         else:
             velocity = calculate_velocity(fixations[-1], point)
             if check_for_nan(velocity):
-                fixations.append(point)
+                #fixations.append(point)
                 continue
             if velocity < velocity_threshold:
                 fixations.append((point[0], point[1], point[2], 1))
