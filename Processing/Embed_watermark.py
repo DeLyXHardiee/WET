@@ -2,6 +2,7 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 import random
+import Filtering.CSVUtility as csvu
 
 # Extract time, x, y from the loaded data
 def read_tuples_from_txt(filename):
@@ -95,9 +96,9 @@ def plot_data(watermarked_data, data):
     plt.show()    
 
 
-def run_watermark(data, sliceSize, strength):
-    #sliceSize = 16
-    #strength = 0.0003
+def run_watermark(data):
+    sliceSize = 16
+    strength = 0.0003
     complex_transformation = get_complex_transformation(data)
     slices = get_slices(complex_transformation,sliceSize)
     watermarked_data = []
@@ -133,10 +134,14 @@ def unrun_watermark(watermarked_data, original_data, sliceSize, strength):
     return extracted_watermark
 
 def watermark_embedding_and_extraction_test(data, slicesize, strength):
-    watermarked_data, watermark = run_watermark(data, slicesize, strength)
+    watermarked_data, watermark = run_watermark(data)
     extracted_watermark = unrun_watermark(watermarked_data, data, slicesize, strength)
     for i in range(len(watermarked_data)-1):
         for j in range(slicesize-1):
             if (watermark[i][j] != extracted_watermark[i][j]):
                 raise ValueError("Original watermark and extracted watermark is not the same")
     print("WEEEEEEEEE")
+
+data = csvu.extract_data("../Datasets/Reading/S_1004_S2_TEX.csv")
+watermark_embedding_and_extraction_test(data, 16, 0.0003)
+
