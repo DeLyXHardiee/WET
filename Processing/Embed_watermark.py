@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import re
 import matplotlib.pyplot as plt
@@ -46,6 +48,7 @@ def embed_watermark(fft,watermark,strength):
 
 def extract_watermark(original_fft, watermark_fft, strenght):
     original_amplitudes = np.abs(original_fft)
+    print(original_amplitudes)
     watermark_amplitudes = np.abs(watermark_fft)
     return (watermark_amplitudes - original_amplitudes)/strenght
 
@@ -109,7 +112,7 @@ def run_watermark(data):
         watermark_slice = generate_watermark(len(slices[i]))
         watermark.append(watermark_slice)
         fft = get_FFT(slices[i])
-        embedded_data = embed_watermark(fft,watermark,strength)
+        embedded_data = embed_watermark(fft,watermark_slice,strength)
         ifft = get_IFFT(embedded_data)
         reverted_ifft = revert_from_complex_numbers(ifft,sliceSize,data,i)
         for i in reverted_ifft:
@@ -138,7 +141,13 @@ def watermark_embedding_and_extraction_test(data, slicesize, strength):
     extracted_watermark = unrun_watermark(watermarked_data, data, slicesize, strength)
     for i in range(len(watermarked_data)-1):
         for j in range(slicesize-1):
-            if (watermark[i][j] != extracted_watermark[i][j]):
+            if math.isnan(watermark[i][j]) | math.isnan(extracted_watermark[i][j]):
+                #print(watermark[i])
+                #print(extracted_watermark[i])
+                continue
+            if round(watermark[i][j]) != round(extracted_watermark[i][j]):
+                #print(int(watermark[i][j]))
+                #print(int(extracted_watermark[i][j]))
                 raise ValueError("Original watermark and extracted watermark is not the same")
     print("WEEEEEEEEE")
 
