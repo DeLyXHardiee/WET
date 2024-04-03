@@ -3,7 +3,8 @@ import Filtering.CSVUtility as csvu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
 import Embed_watermark as ew
-import Processing.Filtering.Analyze as an
+import Adversary as ad
+import Filtering.Analyze as an
 import sys
 
 reading_datasets_location = '../Datasets/Reading/'
@@ -13,6 +14,7 @@ IDT_location = 'ProcessedDatasets/IDT/'
 IVT_location = 'ProcessedDatasets/IVT/'
 WIDT_location = 'ProcessedDatasets/WIDT/'
 WIVT_location = 'ProcessedDatasets/WIVT/'
+AGWN_location = 'ProcessedDatasets/AGWN/'
 
 def run_IDT(fileIn, duration_threshold=30, dispersion_threshold=0.5):
     eye_tracking_data = csvu.extract_data(fileIn)
@@ -42,12 +44,26 @@ def run_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0
     _,watermark,watermarkedFile = run_embed_watermark(IDTFile, WIDT_location)
     watermarked_idt_data,_ = run_IDT(watermarkedFile,duration_threshold,dispersion_threshold)
     print(an.measure_saccade_accuracy(original_idt_data, watermarked_idt_data))    
+    return watermarked_idt_data
 
 def run_IVT_with_watermark(fileIn, velocity_treshold=0):
     original_ivt_data,IVTFile = run_IVT(fileIn,velocity_treshold)
     _,watermark,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location)
     watermarked_ivt_data,_ = run_IVT(watermarkedFile,velocity_treshold)
     print(an.measure_saccade_accuracy(original_ivt_data, watermarked_ivt_data))
+    return watermarked_ivt_data
+
+def run_AGWN_on_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5):
+    attacked_data = ad.gaussian_white_noise_attack(run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold))
+    outFile = name_file(fileIn,'AGWN_IDT',AGWN_location)
+    csvu.write_data(outFile, attacked_data)
+    return attacked_data
+
+def run_AGWN_on_IVT_with_watermark(fileIn, velocity_treshold=0):
+    attacked_data = ad.gaussian_white_noise_attack(run_IVT_with_watermark(fileIn, velocity_treshold))
+    outFile = name_file(fileIn,'AGWN_IVT',AGWN_location)
+    csvu.write_data(outFile, attacked_data)
+    return attacked_data
 
 def name_file(filename,analysistype,folder):
     file_name, file_extension = os.path.splitext(os.path.basename(filename))
@@ -64,23 +80,34 @@ def run():
     match mode:
         case 'IDT':
             if len(sys.argv) == 5:
-                run_IDT(sys.argv[2],float(sys.argv[3]),float(sys.argv[4]))
+                run_IDT(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
             else:
                 run_IDT(sys.argv[2])
         case 'IVT':
             if len(sys.argv) == 4:
-                run_IVT(sys.argv[2],float(sys.argv[3]))
+                run_IVT(sys.argv[2], float(sys.argv[3]))
             else:
                 run_IVT(sys.argv[2])
         case 'WIDT':
             if len(sys.argv) == 5:
-                run_IDT_with_watermark(sys.argv[2],float(sys.argv[3]),float(sys.argv[4]))
+                run_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
             else:
                 run_IDT_with_watermark(sys.argv[2])
         case 'WIVT':
             if len(sys.argv) == 4:
-                run_IVT_with_watermark(sys.argv[2],float(sys.argv[3]))
+                run_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
             else:
                 run_IVT_with_watermark(sys.argv[2])
+        case 'AGWN_IDT':
+            if len(sys.argv) == 5:
+                run_AGWN_on_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+            else:
+                run_AGWN_on_IDT_with_watermark(sys.argv[2])
+        case 'AGWN_IVT':
+            if len(sys.argv) == 4:
+                run_AGWN_on_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
+            else:
+                run_AGWN_on_IVT_with_watermark(sys.argv[2])
+
 
 run()
