@@ -16,6 +16,13 @@ WIDT_location = 'ProcessedDatasets/WIDT/'
 WIVT_location = 'ProcessedDatasets/WIVT/'
 AGWN_location = 'ProcessedDatasets/AGWN/'
 
+IDT_MODE = 'IDT'
+IVT_MODE = 'IVT'
+WIDT_MODE = 'WIDT'
+WIVT_MODE = 'WIVT'
+AGWN_IDT_MODE = 'AGWN_IDT'
+AGWN_IVT_MODE = 'AGWN_IVT'
+
 def run_IDT(fileIn, duration_threshold=30, dispersion_threshold=0.5):
     eye_tracking_data = csvu.extract_data(fileIn)
     print("eye tracking data size: " + str(len(eye_tracking_data)))
@@ -77,37 +84,36 @@ def run():
     #format example: IVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03
     #format example: WIVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03 
     mode = sys.argv[1]
-    match mode:
-        case 'IDT':
-            if len(sys.argv) == 5:
-                run_IDT(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
-            else:
-                run_IDT(sys.argv[2])
-        case 'IVT':
-            if len(sys.argv) == 4:
-                run_IVT(sys.argv[2], float(sys.argv[3]))
-            else:
-                run_IVT(sys.argv[2])
-        case 'WIDT':
-            if len(sys.argv) == 5:
-                run_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
-            else:
-                run_IDT_with_watermark(sys.argv[2])
-        case 'WIVT':
-            if len(sys.argv) == 4:
-                run_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
-            else:
-                run_IVT_with_watermark(sys.argv[2])
-        case 'AGWN_IDT':
-            if len(sys.argv) == 5:
-                run_AGWN_on_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
-            else:
-                run_AGWN_on_IDT_with_watermark(sys.argv[2])
-        case 'AGWN_IVT':
-            if len(sys.argv) == 4:
-                run_AGWN_on_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
-            else:
-                run_AGWN_on_IVT_with_watermark(sys.argv[2])
+    if mode == IDT_MODE:
+        if len(sys.argv) == 5:
+            run_IDT(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+        else:
+            run_IDT(sys.argv[2])
+    elif mode == IVT_MODE:
+        if len(sys.argv) == 4:
+            run_IVT(sys.argv[2], float(sys.argv[3]))
+        else:
+            run_IVT(sys.argv[2])
+    elif mode == WIDT_MODE:
+        if len(sys.argv) == 5:
+            run_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+        else:
+            run_IDT_with_watermark(sys.argv[2])
+    elif mode == WIVT_MODE:
+        if len(sys.argv) == 4:
+            run_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
+        else:
+            run_IVT_with_watermark(sys.argv[2])
+    elif mode == AGWN_IDT_MODE:
+        if len(sys.argv) == 5:
+            run_AGWN_on_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+        else:
+            run_AGWN_on_IDT_with_watermark(sys.argv[2])
+    elif mode == AGWN_IVT_MODE:
+        if len(sys.argv) == 4:
+            run_AGWN_on_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
+        else:
+            run_AGWN_on_IVT_with_watermark(sys.argv[2])
 
 
 run()
