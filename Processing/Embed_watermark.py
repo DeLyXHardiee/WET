@@ -115,9 +115,9 @@ def watermark_embedding_and_extraction_test(data, strength):
             count = count + 1
     print(len(watermark))
     print(count)
-    csvu.write_data("test", watermarked_data)
+    csvu.write_data("test.csv", watermarked_data)
 
 
 data = csvu.extract_data("../Datasets/Reading/S_1004_S2_TEX.csv")
-watermark_embedding_and_extraction_test(data, 100000)
+watermark_embedding_and_extraction_test(data, 0.0003)
 
