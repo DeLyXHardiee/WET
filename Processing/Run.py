@@ -3,7 +3,7 @@ import Filtering.CSVUtility as csvu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
 import Embed_watermark as ew
-import Analysis.Analyze as an
+import Processing.Filtering.Analyze as an
 import sys
 
 reading_datasets_location = '../Datasets/Reading/'

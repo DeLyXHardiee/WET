@@ -6,26 +6,12 @@ import matplotlib.pyplot as plt
 import random
 import Filtering.CSVUtility as csvu
 
-# Extract time, x, y from the loaded data
-def read_tuples_from_txt(filename):
-    result = []
-    with open(filename, 'r') as file:
-        for line in file:
-            current_tuple = eval(line.strip())
-            result.append(current_tuple)
-    return result
 
 def get_complex_transformation(data):
     complex_numbers = []
     for tuple in data:
         complex_numbers.append(tuple[1] + 1j*tuple[2])
     return complex_numbers
-
-def get_slices(complex_transformation,slicesize):
-    slices = []
-    for i in range(0,len(complex_transformation),slicesize):
-        slices.append(complex_transformation[i:i+slicesize])
-    return slices
 
 def generate_watermark(length):
     maxZeros = int(length*0.375)
@@ -41,31 +27,24 @@ def get_FFT(complex_transformation):
     fft_result = np.fft.fft(complex_transformation)
     return fft_result
 
-def embed_watermark(fft,watermark,strength):
-    amplitudes = np.abs(fft)
-    modified_amplitudes = np.add((watermark*strength),amplitudes)
-    return modified_amplitudes * np.exp(1j * np.angle(fft))
 
-def extract_watermark(original_fft, watermark_fft, strenght):
-    original_amplitudes = np.abs(original_fft)
-    print(original_amplitudes)
-    watermark_amplitudes = np.abs(watermark_fft)
-    return (watermark_amplitudes - original_amplitudes)/strenght
+def embed_watermark(fft,watermark,strength):
+    amplitudes = np.real(fft)
+    modified_amplitudes = np.add(np.multiply(watermark, strength), amplitudes)
+    return np.add(modified_amplitudes, np.multiply(1j, np.imag(fft)))
+
+def extract_watermark(original_fft, watermark_fft, strength):
+    original_amplitudes = np.real(original_fft)
+    watermark_amplitudes = np.real(watermark_fft)
+    return np.round(np.divide(np.subtract(watermark_amplitudes, original_amplitudes), strength))
 
 def get_IFFT(fft):
     return np.fft.ifft(fft)
 
-def write_tuples_to_txt(tuples,filename):
-    with open(filename,'w') as file:
-        for data in tuples:
-            file.write(str(data[0:3]))
-            file.write('\n')
-
-def revert_from_complex_numbers(slice,slicesize,data,i):
+def revert_from_complex_numbers(ifft,data):
     points = []
-    for j in range(0,len(slice)):
-            #print(i*slicesize+j)
-            points.append((data[i*slicesize+j][0],slice[j].real,slice[j].imag, int(data[i*slicesize+j][3])))
+    for i in range(0,len(data)):
+        points.append((data[i][0], ifft[i].real, ifft[i].imag, data[i][3]))
     return points
 
 def plot_data(watermarked_data, data):
@@ -98,59 +77,51 @@ def plot_data(watermarked_data, data):
     # Show the plot
     plt.show()    
 
-
-def run_watermark(data):
-    sliceSize = 16
-    strength = 0.0003
-    complex_transformation = get_complex_transformation(data)
-    slices = get_slices(complex_transformation,sliceSize)
-    watermarked_data = []
-    watermark = []
-    for i in range (0,len(slices)):
-        if len(slices[i])<1:
+def filter_data(data):
+    filtered_data = []
+    count = 0
+    for i in range(len(data)):
+        if np.isnan(data[i][1]) or np.isnan(data[i][2]):
+            count = count + 1
             continue
-        watermark_slice = generate_watermark(len(slices[i]))
-        watermark.append(watermark_slice)
-        fft = get_FFT(slices[i])
-        embedded_data = embed_watermark(fft,watermark_slice,strength)
-        ifft = get_IFFT(embedded_data)
-        reverted_ifft = revert_from_complex_numbers(ifft,sliceSize,data,i)
-        for i in reverted_ifft:
-            watermarked_data.append(i)
-    return watermarked_data, watermark
+        filtered_data.append(data[i])
+    print(count)
+    return filtered_data
 
-def unrun_watermark(watermarked_data, original_data, sliceSize, strength):
+def run_watermark(data, strength):
+    complex_transformation = get_complex_transformation(data)
+    watermarked_data = []
+    watermark = generate_watermark(len(complex_transformation))
+    fft = get_FFT(complex_transformation)
+    embedded_data = embed_watermark(fft,watermark,strength)
+    ifft = get_IFFT(embedded_data)
+    reverted_ifft = revert_from_complex_numbers(ifft, data)
+    return reverted_ifft, watermark
+
+def unrun_watermark(watermarked_data, original_data, strength):
     if len(watermarked_data) != len(original_data):
         raise ValueError("Length of true data and predicted data must be the same")
     complex_transformation_original = get_complex_transformation(original_data)
     complex_transformation_watermark = get_complex_transformation(watermarked_data)
-    original_slices = get_slices(complex_transformation_original, sliceSize)
-    watermark_slices = get_slices(complex_transformation_watermark, sliceSize)
-    extracted_watermark = []
-    for i in range (0,len(original_slices)):
-        if len(original_slices[i])<1:
-            continue
-        original_fft = get_FFT(original_slices[i])
-        watermark_fft = get_FFT(watermark_slices[i])
-        watermark = extract_watermark(original_fft, watermark_fft, strength)
-        extracted_watermark.append(watermark)
+    original_fft = get_FFT(complex_transformation_original)
+    watermark_fft = get_FFT(complex_transformation_watermark)
+    extracted_watermark = extract_watermark(original_fft, watermark_fft, strength)
     return extracted_watermark
 
-def watermark_embedding_and_extraction_test(data, slicesize, strength):
-    watermarked_data, watermark = run_watermark(data)
-    extracted_watermark = unrun_watermark(watermarked_data, data, slicesize, strength)
-    for i in range(len(watermarked_data)-1):
-        for j in range(slicesize-1):
-            if math.isnan(watermark[i][j]) | math.isnan(extracted_watermark[i][j]):
-                #print(watermark[i])
-                #print(extracted_watermark[i])
-                continue
-            if round(watermark[i][j]) != round(extracted_watermark[i][j]):
-                #print(int(watermark[i][j]))
-                #print(int(extracted_watermark[i][j]))
-                raise ValueError("Original watermark and extracted watermark is not the same")
-    print("WEEEEEEEEE")
+def watermark_embedding_and_extraction_test(data, strength):
+    print(len(data))
+    filtered_data = filter_data(data)
+    watermarked_data, watermark = run_watermark(filtered_data, strength)
+    extracted_watermark = unrun_watermark(watermarked_data, filtered_data, strength)
+    count = 0
+    for i in range(len(watermark)):
+        if (np.array_equal(watermark[i],extracted_watermark[i])):
+            count = count + 1
+    print(len(watermark))
+    print(count)
+    csvu.write_data("test", watermarked_data)
+
 
 data = csvu.extract_data("../Datasets/Reading/S_1004_S2_TEX.csv")
-watermark_embedding_and_extraction_test(data, 16, 0.0003)
+watermark_embedding_and_extraction_test(data, 100000)
 
