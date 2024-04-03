@@ -1,7 +1,4 @@
-import math
-
 import numpy as np
-import re
 import matplotlib.pyplot as plt
 import random
 import Filtering.CSVUtility as csvu
@@ -26,7 +23,6 @@ def generate_watermark(length):
 def get_FFT(complex_transformation):
     fft_result = np.fft.fft(complex_transformation)
     return fft_result
-
 
 def embed_watermark(fft,watermark,strength):
     amplitudes = np.real(fft)
