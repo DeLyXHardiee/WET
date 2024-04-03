@@ -1,3 +1,4 @@
+
 def measure_saccade_accuracy(true_data, predicted_data):
     if len(true_data) != len(predicted_data):
         raise ValueError("Length of true data and predicted data must be the same")
@@ -5,6 +6,9 @@ def measure_saccade_accuracy(true_data, predicted_data):
     # Extract saccade labels from true and predicted data
     true_saccades = [point for point in true_data if point[3] == 2]
     predicted_saccades = [point for point in predicted_data if point[3] == 2]
+    print("True data " + str(true_data))
+    print("True saccades " + str(true_saccades))
+    print("Predictetd saccades " + str(predicted_saccades))
 
     # Calculate intersection of true and predicted saccades
     true_positives = 0
@@ -20,5 +24,6 @@ def measure_saccade_accuracy(true_data, predicted_data):
 
     # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
     accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
-
+    print("Accuracy " + str(accuracy))
+    print("")
     return accuracy

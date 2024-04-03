@@ -1,6 +1,5 @@
 import numpy as np
-import numpy as np
-import Analysis.Analyze as an
+import Analyze as an
 
 import math
 
@@ -56,12 +55,13 @@ def find_best_threshold(protocol):
 
     best_threshold = 0.0
     best_f1_score = 0.0
+
     fixations = []
 
     for threshold in threshold_range:
         # Apply I-VT algorithm with current threshold to segment dataset
         # ivt_output = apply_ivt_algorithm(dataset, threshold)
-
+        print(threshold)
         # Calculate F1 score using ground truth labels and ivt_output
         fixations = IVT(protocol, threshold)
         f1_score = an.measure_saccade_accuracy(protocol, fixations)
