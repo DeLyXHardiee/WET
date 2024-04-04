@@ -4,7 +4,7 @@ import Filtering.IDT as idt
 import Filtering.IVT as ivt
 import Embed_watermark as ew
 import Adversary as ad
-import Filtering.Analyze as an
+import Analyze as an
 import sys
 
 reading_datasets_location = '../Datasets/Reading/'
@@ -39,36 +39,36 @@ def run_IVT(fileIn, velocity_threshold=0):
     csvu.write_data(outFile, result)
     return result,outFile
 
-def run_embed_watermark(fileIn, outFolder):
+def run_embed_watermark(fileIn, outFolder, strength=0.0003):
     data = csvu.extract_data(fileIn)
-    result,watermark = ew.run_watermark(data)
+    result,watermark = ew.run_watermark(data, strength)
     outFile = name_file(fileIn,'WM',outFolder)
     csvu.write_data(outFile, result)
     return result,watermark,outFile
 
-def run_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5):
+def run_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5, strength=0.0003):
     original_idt_data,IDTFile = run_IDT(fileIn, duration_threshold, dispersion_threshold)
-    _,watermark,watermarkedFile = run_embed_watermark(IDTFile, WIDT_location)
+    _,watermark,watermarkedFile = run_embed_watermark(IDTFile, WIDT_location, strength)
     watermarked_idt_data,_ = run_IDT(watermarkedFile,duration_threshold,dispersion_threshold)
     print(an.measure_saccade_accuracy(original_idt_data, watermarked_idt_data))    
     return watermarked_idt_data
 
-def run_IVT_with_watermark(fileIn, velocity_treshold=0):
+def run_IVT_with_watermark(fileIn, velocity_treshold=0, strength=0.0003):
     original_ivt_data,IVTFile = run_IVT(fileIn,velocity_treshold)
-    _,watermark,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location)
+    _,watermark,watermarkedFile = run_embed_watermark(IVTFile, WIVT_location, strength)
     watermarked_ivt_data,_ = run_IVT(watermarkedFile,velocity_treshold)
     print(an.measure_saccade_accuracy(original_ivt_data, watermarked_ivt_data))
     return watermarked_ivt_data
 
-def run_AGWN_on_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5):
-    attacked_data = ad.gaussian_white_noise_attack(run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold))
-    outFile = name_file(fileIn,'AGWN_IDT',AGWN_location)
+def run_AGWN_on_IDT_with_watermark(fileIn, duration_threshold=30, dispersion_threshold=0.5, strength=0.0003):
+    attacked_data = ad.gaussian_white_noise_attack(run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength))
+    outFile = name_file(fileIn,'WM_AGWN_IDT',AGWN_location)
     csvu.write_data(outFile, attacked_data)
     return attacked_data
 
-def run_AGWN_on_IVT_with_watermark(fileIn, velocity_treshold=0):
-    attacked_data = ad.gaussian_white_noise_attack(run_IVT_with_watermark(fileIn, velocity_treshold))
-    outFile = name_file(fileIn,'AGWN_IVT',AGWN_location)
+def run_AGWN_on_IVT_with_watermark(fileIn, velocity_treshold=0, strength=0.0003):
+    attacked_data = ad.gaussian_white_noise_attack(run_IVT_with_watermark(fileIn, velocity_treshold, strength))
+    outFile = name_file(fileIn,'WM_AGWN_IVT',AGWN_location)
     csvu.write_data(outFile, attacked_data)
     return attacked_data
 
@@ -95,25 +95,24 @@ def run():
         else:
             run_IVT(sys.argv[2])
     elif mode == WIDT_MODE:
-        if len(sys.argv) == 5:
-            run_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+        if len(sys.argv) == 6:
+            run_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]))
         else:
             run_IDT_with_watermark(sys.argv[2])
     elif mode == WIVT_MODE:
-        if len(sys.argv) == 4:
-            run_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
+        if len(sys.argv) == 5:
+            run_IVT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
         else:
             run_IVT_with_watermark(sys.argv[2])
     elif mode == AGWN_IDT_MODE:
-        if len(sys.argv) == 5:
-            run_AGWN_on_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+        if len(sys.argv) == 6:
+            run_AGWN_on_IDT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]))
         else:
             run_AGWN_on_IDT_with_watermark(sys.argv[2])
     elif mode == AGWN_IVT_MODE:
-        if len(sys.argv) == 4:
-            run_AGWN_on_IVT_with_watermark(sys.argv[2], float(sys.argv[3]))
+        if len(sys.argv) == 5:
+            run_AGWN_on_IVT_with_watermark(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
         else:
             run_AGWN_on_IVT_with_watermark(sys.argv[2])
-
 
 run()

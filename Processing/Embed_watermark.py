@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import Filtering.CSVUtility as csvu
+import Analyze as an
 
 
 def get_complex_transformation(data):
@@ -93,7 +94,7 @@ def run_watermark(data, strength=0.0003):
     reverted_ifft = revert_from_complex_numbers(ifft, data)
     return reverted_ifft, watermark
 
-def unrun_watermark(watermarked_data, original_data, strength):
+def unrun_watermark(watermarked_data, original_data, strength=0.0003):
     if len(watermarked_data) != len(original_data):
         raise ValueError("Length of true data and predicted data must be the same")
     complex_transformation_original = get_complex_transformation(original_data)
@@ -116,7 +117,13 @@ def watermark_embedding_and_extraction_test(data, strength):
     print(count)
     csvu.write_data("test.csv", watermarked_data)
 
+original_data = csvu.extract_data("ProcessedDatasets/IVT/S_1004_S2_TEX_IVT.csv")
+with_noise = csvu.extract_data("ProcessedDatasets/AGWN/S_1004_S2_TEX_WM_AGWN_IVT.csv")
+without_noise = csvu.extract_data("ProcessedDatasets/WIVT/S_1004_S2_TEX_IVT_WM.csv")
 
-data = csvu.extract_data("../Datasets/Reading/S_1004_S2_TEX.csv")
-watermark_embedding_and_extraction_test(data, 0.0003)
+noise_watermark = unrun_watermark(with_noise, original_data)
+watermark = unrun_watermark(without_noise, original_data)
+print(an.normalized_cross_correlation(noise_watermark, watermark))
+
+
 

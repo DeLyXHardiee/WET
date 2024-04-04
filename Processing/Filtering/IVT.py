@@ -1,4 +1,8 @@
 import numpy as np
+import sys
+import os
+parent_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(parent_dir)
 import Analyze as an
 
 import math
@@ -28,6 +32,14 @@ def calculate_velocity(point1, point2):
     dt = point2[0] - point1[0]
     velocity = np.sqrt(dx**2 + dy**2) / dt
     return velocity
+
+def filter_data(data):
+    filtered_data = []
+    for i in range(len(data)):
+        if np.isnan(data[i][1]) or np.isnan(data[i][2]):
+            continue
+        filtered_data.append(data[i])
+    return filtered_data
 
 """I-VT algorithm without fixation groups"""
 def IVT(protocol, velocity_threshold=0):

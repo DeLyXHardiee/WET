@@ -1,5 +1,5 @@
 import pandas as pd
-import csv
+import numpy as np
 
 def extract_data(csv_file_path):
     # Read the Excel file into a pandas DataFrame
@@ -16,7 +16,15 @@ def extract_data(csv_file_path):
         'y': y_values,
         'lab': labels
     })
-    return extracted_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1)
+    return filter_data(extracted_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1))
+
+def filter_data(data):
+    filtered_data = []
+    for i in range(len(data)):
+        if np.isnan(data[i][1]) or np.isnan(data[i][2]):
+            continue
+        filtered_data.append(data[i])
+    return filtered_data
 
 def write_data(csv_filename, data):
     print(str(csv_filename) + str(len(data)))
