@@ -1,6 +1,7 @@
 import numpy as np
 
-def gaussian_white_noise_attack(data, mean=0, std=0.1):
+def gaussian_white_noise_attack(data, std=0.1):
+    mean=0
     attacked_data = []
     for point in data:
         noise_x = np.random.normal(mean, std)

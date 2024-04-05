@@ -117,13 +117,4 @@ def watermark_embedding_and_extraction_test(data, strength):
     print(count)
     csvu.write_data("test.csv", watermarked_data)
 
-original_data = csvu.extract_data("ProcessedDatasets/IVT/S_1004_S2_TEX_IVT.csv")
-with_noise = csvu.extract_data("ProcessedDatasets/AGWN/S_1004_S2_TEX_WM_AGWN_IVT.csv")
-without_noise = csvu.extract_data("ProcessedDatasets/WIVT/S_1004_S2_TEX_IVT_WM.csv")
-
-noise_watermark = unrun_watermark(with_noise, original_data)
-watermark = unrun_watermark(without_noise, original_data)
-print(an.normalized_cross_correlation(noise_watermark, watermark))
-
-
 
