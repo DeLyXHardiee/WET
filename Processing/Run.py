@@ -15,6 +15,8 @@ IVT_location = 'ProcessedDatasets/IVT/'
 WIDT_location = 'ProcessedDatasets/WIDT/'
 WIVT_location = 'ProcessedDatasets/WIVT/'
 AGWN_location = 'ProcessedDatasets/AGWN/'
+Results_location = 'Results/'
+#NCC_AGWN_IVT_Results_location = 
 
 IDT_MODE = 'IDT'
 IVT_MODE = 'IVT'
@@ -23,6 +25,7 @@ WIVT_MODE = 'WIVT'
 AGWN_IDT_MODE = 'AGWN_IDT'
 AGWN_IVT_MODE = 'AGWN_IVT'
 NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
+NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
 
 def run_IDT(fileIn, duration_threshold, dispersion_threshold):
     eye_tracking_data = csvu.extract_data(fileIn)
@@ -75,6 +78,23 @@ def run_AGWN_on_IVT_with_watermark(fileIn, velocity_treshold, strength, standard
     csvu.write_data(outFile, attacked_data)
     return ivt_watermarked, attacked_data
 
+def run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation):
+    original_data = csvu.extract_data(filename)
+    #ivt_watermarked, attacked_data = run_AGWN_on_IVT_with_watermark(filename, velocity_threshold, strength, standard_deviation)
+    #noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
+    #watermark = ew.unrun_watermark(ivt_watermarked, original_data, strength)
+    result = 1# an.normalized_cross_correlation(noise_watermark, watermark)
+    new_filename = name_file('NCC','AGWN_IVT',Results_location) + '.csv'
+    csvu.append_result(new_filename,(velocity_threshold, strength, standard_deviation),result)
+
+def run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation):
+    original_data = csvu.extract_data(filename)
+    ivt_watermarked, attacked_data = run_AGWN_on_IDT_with_watermark(filename,duration_threshold, dispersion_threshold, strength, standard_deviation)
+    noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
+    watermark = ew.unrun_watermark(ivt_watermarked, original_data, strength)
+    print("NCC:")
+    print(an.normalized_cross_correlation(noise_watermark, watermark))
+
 def name_file(filename,analysistype,folder):
     file_name, file_extension = os.path.splitext(os.path.basename(filename))
     new_file_name = folder + file_name + '_' + analysistype + file_extension
@@ -122,11 +142,8 @@ def run():
     elif mode == AGWN_IVT_MODE:
         run_AGWN_on_IVT_with_watermark(filename, velocity_threshold, strength, standard_deviation)
     elif mode == NCC_AGWN_IVT_MODE:
-        original_data = csvu.extract_data(filename)
-        ivt_watermarked, attacked_data = run_AGWN_on_IVT_with_watermark(filename, velocity_threshold, strength, standard_deviation)
-        noise_watermark = ew.unrun_watermark(attacked_data, original_data)
-        watermark = ew.unrun_watermark(ivt_watermarked, original_data)
-        print("NCC:")
-        print(an.normalized_cross_correlation(noise_watermark, watermark))
+        run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation)
+    elif mode == NCC_AGWN_IDT_MODE:
+        run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation)
 
 run()

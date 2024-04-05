@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 
@@ -29,4 +30,19 @@ def filter_data(data):
 def write_data(csv_filename, data):
     print(str(csv_filename) + str(len(data)))
     df = pd.DataFrame(data, columns=['n', 'x', 'y', 'lab'])
+    df.to_csv(csv_filename, index=False)
+
+def append_result(csv_filename, parameters, result):
+    print(csv_filename)
+    try:
+        df = pd.read_csv(csv_filename)
+    except FileNotFoundError:
+        print("File not found")
+        return
+
+    # Append new data
+    new_row = pd.Series(parameters + [result], index=df.columns)
+    df = df.append(new_row, ignore_index=True)
+
+    # Write back to the file
     df.to_csv(csv_filename, index=False)

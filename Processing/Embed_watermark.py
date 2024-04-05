@@ -85,7 +85,7 @@ def filter_data(data):
     print(count)
     return filtered_data
 
-def run_watermark(data, strength=0.0003):
+def run_watermark(data, strength):
     complex_transformation = get_complex_transformation(data)
     watermark = generate_watermark(len(complex_transformation))
     fft = get_FFT(complex_transformation)
@@ -94,7 +94,7 @@ def run_watermark(data, strength=0.0003):
     reverted_ifft = revert_from_complex_numbers(ifft, data)
     return reverted_ifft, watermark
 
-def unrun_watermark(watermarked_data, original_data, strength=0.0003):
+def unrun_watermark(watermarked_data, original_data, strength):
     if len(watermarked_data) != len(original_data):
         raise ValueError("Length of true data and predicted data must be the same")
     complex_transformation_original = get_complex_transformation(original_data)
