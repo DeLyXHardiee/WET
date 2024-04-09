@@ -65,7 +65,7 @@ def run_IVT_with_watermark(fileIn, velocity_treshold, strength):
     return watermarked_ivt_data
 
 def run_AGWN_on_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength, standard_deviation):
-    idt_watermarked = run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength, standard_deviation)
+    idt_watermarked = run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength)
     attacked_data = ad.gaussian_white_noise_attack(idt_watermarked,standard_deviation)
     outFile = name_file(fileIn,'WM_AGWN_IDT',AGWN_location)
     csvu.write_data(outFile, attacked_data)
@@ -80,20 +80,23 @@ def run_AGWN_on_IVT_with_watermark(fileIn, velocity_treshold, strength, standard
 
 def run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation):
     original_data = csvu.extract_data(filename)
-    #ivt_watermarked, attacked_data = run_AGWN_on_IVT_with_watermark(filename, velocity_threshold, strength, standard_deviation)
-    #noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
-    #watermark = ew.unrun_watermark(ivt_watermarked, original_data, strength)
-    result = 1# an.normalized_cross_correlation(noise_watermark, watermark)
-    new_filename = name_file('NCC','AGWN_IVT',Results_location) + '.csv'
-    csvu.append_result(new_filename,(velocity_threshold, strength, standard_deviation),result)
+    ivt_watermarked, attacked_data = run_AGWN_on_IVT_with_watermark(filename, velocity_threshold, strength, standard_deviation)
+    noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
+    watermark = ew.unrun_watermark(ivt_watermarked, original_data, strength)
+    result = an.normalized_cross_correlation(noise_watermark, watermark)
+    result_file = name_file('NCC','AGWN_IVT',Results_location) + '.csv'
+    values = [ velocity_threshold,strength,standard_deviation,result ]
+    csvu.append_result(result_file,values)
 
 def run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation):
     original_data = csvu.extract_data(filename)
     ivt_watermarked, attacked_data = run_AGWN_on_IDT_with_watermark(filename,duration_threshold, dispersion_threshold, strength, standard_deviation)
     noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
     watermark = ew.unrun_watermark(ivt_watermarked, original_data, strength)
-    print("NCC:")
-    print(an.normalized_cross_correlation(noise_watermark, watermark))
+    result = an.normalized_cross_correlation(noise_watermark, watermark)
+    result_file = name_file('NCC','AGWN_IDT',Results_location) + '.csv'
+    values = [ duration_threshold, dispersion_threshold, strength, standard_deviation, result ]
+    csvu.append_result(result_file,values)
 
 def name_file(filename,analysistype,folder):
     file_name, file_extension = os.path.splitext(os.path.basename(filename))
