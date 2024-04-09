@@ -1,4 +1,6 @@
 import os
+
+from matplotlib import pyplot as plt
 import Filtering.CSVUtility as csvu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
@@ -26,6 +28,7 @@ AGWN_IDT_MODE = 'AGWN_IDT'
 AGWN_IVT_MODE = 'AGWN_IVT'
 NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
 NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
+PLOT_RESULTS_MODE = 'PLOT_RESULTS'
 
 def run_IDT(fileIn, duration_threshold, dispersion_threshold):
     eye_tracking_data = csvu.extract_data(fileIn)
@@ -104,6 +107,34 @@ def name_file(filename,analysistype,folder):
     print("new file name : " + new_file_name)
     return folder + file_name + '_' + analysistype + file_extension
 
+def plot_results(filename,dictionary,axis):
+    results = []
+    data = csvu.extract_data(filename)
+    for tuple in data:
+        for index, value in dictionary.items():
+            if tuple[index] != value:
+                continue
+        results.append(tuple)
+    SD = []
+    S = []
+    NCC = []
+    for i in results:
+        SD.append(i[-3])
+        S.append(i[-2])
+        NCC.append(i[-1])
+    plt.figure()
+    if axis == 'SD':
+        plt.scatter(SD, NCC, color='blue')
+        plt.xlabel('SD')
+        plt.ylabel('NCC')
+    elif axis == 'S':
+        plt.scatter(S, NCC, color='blue')
+        plt.xlabel('S')
+        plt.ylabel('NCC')
+    plt.title('Strength = ' + str(dictionary[2]))
+    plt.grid(True)
+    plt.show()    
+
 def run():
     #format example: IDT ../Datasets/Reading/S_1004_S2_TEX.csv 100 0.5
     #format example: WIDT ../Datasets/Reading/S_1004_S2_TEX.csv 100 0.5
@@ -148,5 +179,13 @@ def run():
         run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation)
     elif mode == NCC_AGWN_IDT_MODE:
         run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation)
+    elif mode == PLOT_RESULTS_MODE:
+        dictionary = {
+            0: 100,
+            1: 0.5,
+            2: 1
+        }
+        filename = Results_location + 'NCC_AGWN_IDT.csv'
+        plot_results(filename,dictionary,'SD')
 
 run()
