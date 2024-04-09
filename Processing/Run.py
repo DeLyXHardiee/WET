@@ -181,9 +181,9 @@ def run():
         run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation)
     elif mode == PLOT_RESULTS_MODE:
         dictionary = {
-            0: 100,
-            1: 0.5,
-            2: 1
+            0: duration_threshold,
+            1: dispersion_threshold,
+            2: strength,
         }
         filename = Results_location + 'NCC_AGWN_IDT.csv'
         plot_results(filename,dictionary,'SD')
