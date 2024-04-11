@@ -29,8 +29,16 @@ AGWN_IDT_MODE = 'AGWN_IDT'
 AGWN_IVT_MODE = 'AGWN_IVT'
 NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
 NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
-PLOT_RESULTS_AGWN_IVT_MODE = 'PLOT_RESULTS_AGWN_IVT'
-PLOT_RESULTS_AGWN_IDT_MODE = 'PLOT_RESULTS_AGWN_IDT'
+DEA_IDT_MODE = 'DEA_IDT'
+DEA_IVT_MODE = 'DEA_IVT'
+RPP_IDT_MODE = 'RPP_IDT'
+RPP_IVT_MODE = 'RPP_IVT'
+LIA_IDT_MODE = 'LIA_IDT'
+LIA_IVT_MODE = 'LIA_IVT'
+CA_IDT_MODE = 'CA_IDT'
+CA_IVT_MODE = 'CA_IVT'
+PLOT_RESULTS_IVT_MODE = 'PLOT_RESULTS_IVT'
+PLOT_RESULTS_IDT_MODE = 'PLOT_RESULTS_IDT'
 DATA_GATHER_IVT = 'DATA_GATHER_IVT'
 DATA_GATHER_IDT = 'DATA_GATHER_IDT'
 
@@ -213,7 +221,7 @@ def run():
         run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation)
     elif mode == NCC_AGWN_IDT_MODE:
         run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation)
-    elif mode == PLOT_RESULTS_AGWN_IDT_MODE:
+    elif mode == PLOT_RESULTS_IDT_MODE:
         dictionary = {
             0: duration_threshold if duration_threshold != -1 else None,
             1: dispersion_threshold if dispersion_threshold != -1 else None,
@@ -221,7 +229,7 @@ def run():
             3: standard_deviation if standard_deviation != -1 else None,
         }
         plot_results(filename,dictionary,axis)
-    elif mode == PLOT_RESULTS_AGWN_IVT_MODE:
+    elif mode == PLOT_RESULTS_IVT_MODE:
         dictionary = {
             0: velocity_threshold if velocity_threshold != -1 else None,
             1: strength if strength != -1 else None,
@@ -243,6 +251,4 @@ def run():
         for i in strengths:
             for j in standard_deviations:
                 run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold,i,j)
-
-
 run()
