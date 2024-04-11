@@ -23,21 +23,33 @@ def extract_data(csv_file_path):
 def extract_data(csv_file_path):
     # Read the Excel file into a pandas DataFrame
     df = pd.read_csv(csv_file_path)
-    duration_thresholds = df["DUT"]
-    dispersion_thresholds = df["DIT"]
     strengths = df["S"]
     standard_deviations = df["SD"]
     results = df["NCC"]
 
     # Create a new DataFrame with the extracted values
-    extracted_data = pd.DataFrame({
-        'DUT': duration_thresholds,
-        'DIT': dispersion_thresholds,
-        'S': strengths,
-        'SD': standard_deviations,
-        'NCC': results
-    })
-    return filter_data(extracted_data.apply(lambda row: (row['DUT'], row['DIT'], row['S'], row['SD'], row['NCC']), axis=1))
+    if "IDT" in csv_file_path:
+        duration_thresholds = df["DUT"]
+        dispersion_thresholds = df["DIT"]
+        extracted_data = pd.DataFrame({
+            'DUT': duration_thresholds,
+            'DIT': dispersion_thresholds,
+            'S': strengths,
+            'SD': standard_deviations,
+            'NCC': results
+        })
+        return filter_data(extracted_data.apply(lambda row: (row['DUT'], row['DIT'], row['S'], row['SD'], row['NCC']), axis=1))
+
+    elif "IVT" in csv_file_path:
+        velocity_thresholds = df["VT"]
+        extracted_data = pd.DataFrame({
+            'VT': velocity_thresholds,
+            'S': strengths,
+            'SD': standard_deviations,
+            'NCC': results
+        })
+        return filter_data(extracted_data.apply(lambda row: (row['VT'], row['S'], row['SD'], row['NCC']), axis=1))
+
 
 def filter_data(data):
     filtered_data = []
