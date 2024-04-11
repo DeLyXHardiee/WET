@@ -1,6 +1,7 @@
 import os
 
 from matplotlib import pyplot as plt
+import numpy as np
 import Filtering.CSVUtility as csvu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
@@ -30,6 +31,8 @@ NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
 NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
 PLOT_RESULTS_AGWN_IVT_MODE = 'PLOT_RESULTS_AGWN_IVT'
 PLOT_RESULTS_AGWN_IDT_MODE = 'PLOT_RESULTS_AGWN_IDT'
+DATA_GATHER_IVT = 'DATA_GATHER_IVT'
+DATA_GATHER_IDT = 'DATA_GATHER_IDT'
 
 
 def run_IDT(fileIn, duration_threshold, dispersion_threshold):
@@ -111,24 +114,29 @@ def name_file(filename,analysistype,folder):
 
 def plot_results(filename,dictionary,axis):
     results = []
-    data = csvu.extract_data(filename)
+    data = csvu.extract_results(filename)
     #Go through tuple and make sure each entry has the same values as dictionary for each variable.
     #This is used to filter out which data points to do analysis on. Leave entries in dictionary blank if you wish to include them regardless of value.
     #IDT: DUT,DIT,S,SD,NCC
     #IVT: VT,S,SD,NCC
+    print(dictionary.items())
     for tuple in data:
+        invalid = False
         for index, value in dictionary.items():
-            if tuple[index] != value:
+            if (tuple[index] != value) & (value != None):
+                invalid = True
                 continue
-        results.append(tuple)
+        if not invalid:
+            results.append(tuple)
     SD = []
     S = []
     NCC = []
     for i in results:
-        SD.append(i[-3])
-        S.append(i[-2])
+        S.append(i[-3])
+        SD.append(i[-2])
         NCC.append(i[-1])
     plt.figure()
+    print(axis)
     if axis == 'SD':
         plt.scatter(SD, NCC, color='blue')
         plt.xlabel('SD')
@@ -142,9 +150,9 @@ def plot_results(filename,dictionary,axis):
         plt.xlabel('S')
         plt.ylabel('NCC')
         if 'IDT' in filename:
-            plt.title('SD = ' + str(dictionary[3]))
+            plt.title('Standard deviation = ' + str(dictionary[3]))
         if 'IVT' in filename:
-            plt.title('SD = ' + str(dictionary[2]))    
+            plt.title('Standard deviation = ' + str(dictionary[2]))    
     plt.grid(True)
     plt.show()    
 
@@ -153,33 +161,41 @@ def run():
     #format example: WIDT ../Datasets/Reading/S_1004_S2_TEX.csv 100 0.5
     #format example: IVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03
     #format example: WIVT ../Datasets/Reading/S_1004_S2_TEX.csv 0.03 
+
+    #plot format: py Run.py PLOT_MODE FILE ALGORITHMPARAMETERS(DUT,DIT,VT) STRENGTH STANDARD_DEVIATION AXIS
+    #-1 MEANS INCLUDE ALL
+    #plot format example: py Run.py PLOT_RESULTS_AGWN_IVT Results/NCC_AGWN_IVT.csv -1 -1 0.001 S
     mode = sys.argv[1]
     filename = sys.argv[2]
-    velocity_threshold = 0.05
-    strength = 0.0003
-    dispersion_threshold = 0.5
-    duration_threshold = 100
-    standard_deviation = 0.001
+    if 'PLOT' not in mode:
+        velocity_threshold = 0.05
+        strength = 0.0003
+        dispersion_threshold = 0.5
+        duration_threshold = 100
+        standard_deviation = 0.001
     axis = 'SD'
     if len(sys.argv) > 3:
         if 'IVT' in mode:
             if sys.argv[3] != NO_VALUE:
                 velocity_threshold = float(sys.argv[3])
-            if (len(sys.argv) > 4) & (sys.argv[3] != NO_VALUE):
+            if (len(sys.argv) > 4) & (sys.argv[4] != NO_VALUE):
                 strength = float(sys.argv[4])
-            if (len(sys.argv) > 5) & (sys.argv[4] != NO_VALUE):
+            if (len(sys.argv) > 5) & (sys.argv[5] != NO_VALUE):
                 standard_deviation = float(sys.argv[5])
+            if 'PLOT' in mode:
+                if (len(sys.argv) > 6) & (sys.argv[6] != NO_VALUE):
+                    axis = sys.argv[6]
         if 'IDT' in mode:
             duration_threshold = float(sys.argv[3])
-            if (len(sys.argv) > 4) & (sys.argv[3] != NO_VALUE):
+            if (len(sys.argv) > 4) & (sys.argv[4] != NO_VALUE):
                 dispersion_threshold = float(sys.argv[4])
-            if (len(sys.argv) > 5) & (sys.argv[4] != NO_VALUE):
+            if (len(sys.argv) > 5) & (sys.argv[5] != NO_VALUE):
                 strength = float(sys.argv[5])
-            if (len(sys.argv) > 6) & (sys.argv[5] != NO_VALUE):
+            if (len(sys.argv) > 6) & (sys.argv[6] != NO_VALUE):
                 standard_deviation = float(sys.argv[6])
-        if 'PLOT' in mode:
-            if (len(sys.argv) > 7) & (sys.argv[6] != NO_VALUE):
-                axis = float(sys.argv[6])
+            if 'PLOT' in mode:
+                if (len(sys.argv) > 7) & (sys.argv[7] != NO_VALUE):
+                    axis = sys.argv[6]
     print(mode)
     if mode == IDT_MODE:
         run_IDT(filename, duration_threshold, dispersion_threshold)
@@ -212,5 +228,21 @@ def run():
             2: standard_deviation if standard_deviation != -1 else None,
         }
         plot_results(filename,dictionary,axis)
+    elif mode == DATA_GATHER_IVT:
+        start_value = 0.1
+        end_value = 1
+        interval = 0.1
+        strengths = np.arange(start_value, end_value + interval, interval)#[0.0003,0.005,0.0495,1]
+        standard_deviations = [0.001,0.01,0.05,0.1]
+        for i in strengths:
+            for j in standard_deviations:
+                run_NCC_AGWN_IVT(filename,velocity_threshold,i,j)
+    elif mode == DATA_GATHER_IDT:
+        strengths = [0.0003,0.005,0.0495,1]
+        standard_deviations = [0.001,0.01,0.05,0.1]
+        for i in strengths:
+            for j in standard_deviations:
+                run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold,i,j)
+
 
 run()

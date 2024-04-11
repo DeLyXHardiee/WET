@@ -20,7 +20,8 @@ def extract_data(csv_file_path):
     })
     return filter_data(extracted_data.apply(lambda row: (row['n'], row['x'], row['y'], row['lab']), axis=1))
 
-def extract_data(csv_file_path):
+def extract_results(csv_file_path):
+    print(csv_file_path)
     # Read the Excel file into a pandas DataFrame
     df = pd.read_csv(csv_file_path)
     strengths = df["S"]
