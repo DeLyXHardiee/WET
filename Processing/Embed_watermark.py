@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import random
 import Filtering.CSVUtility as csvu
 import Analyze as an
+import Adversary as ad
+import Filtering.IVT as ivt
 
 
 def get_complex_transformation(data):
@@ -72,17 +74,14 @@ def plot_data(watermarked_data, data):
     plt.legend()
 
     # Show the plot
-    plt.show()    
+    plt.show()
 
 def filter_data(data):
     filtered_data = []
-    count = 0
     for i in range(len(data)):
         if np.isnan(data[i][1]) or np.isnan(data[i][2]):
-            count = count + 1
             continue
         filtered_data.append(data[i])
-    print(count)
     return filtered_data
 
 def run_watermark(data, strength=0.0003):
@@ -115,9 +114,17 @@ def watermark_embedding_and_extraction_test(data, strength):
             count = count + 1
     print(len(watermark))
     print(count)
-    csvu.write_data("test.csv", watermarked_data)
+
+def test_gaussian_attack_deviation(data, velocity_threshold, deviation):
+    labeled_data = ivt.IVT(data, velocity_threshold)
+    attacked_data = ad.gaussian_white_noise_attack(labeled_data, 0, deviation)
+    labeled_data2 = ivt.IVT(attacked_data, velocity_threshold)
+    print(an.measure_saccade_accuracy(labeled_data, labeled_data2))
 
 original_data = csvu.extract_data("ProcessedDatasets/IVT/S_1004_S2_TEX_IVT.csv")
+watermark_embedding_and_extraction_test(original_data, 1)
+
+#test_gaussian_attack_deviation(original_data, 0.5, 0.03)
 with_noise = csvu.extract_data("ProcessedDatasets/AGWN/S_1004_S2_TEX_WM_AGWN_IVT.csv")
 without_noise = csvu.extract_data("ProcessedDatasets/WIVT/S_1004_S2_TEX_IVT_WM.csv")
 
