@@ -84,7 +84,7 @@ def filter_data(data):
         filtered_data.append(data[i])
     return filtered_data
 
-def run_watermark(data, strength=0.0003):
+def run_watermark(data, strength):
     complex_transformation = get_complex_transformation(data)
     watermark = generate_watermark(len(complex_transformation))
     fft = get_FFT(complex_transformation)
@@ -93,7 +93,7 @@ def run_watermark(data, strength=0.0003):
     reverted_ifft = revert_from_complex_numbers(ifft, data)
     return reverted_ifft, watermark
 
-def unrun_watermark(watermarked_data, original_data, strength=0.0003):
+def unrun_watermark(watermarked_data, original_data, strength):
     if len(watermarked_data) != len(original_data):
         raise ValueError("Length of true data and predicted data must be the same")
     complex_transformation_original = get_complex_transformation(original_data)
@@ -120,17 +120,4 @@ def test_gaussian_attack_deviation(data, velocity_threshold, deviation):
     attacked_data = ad.gaussian_white_noise_attack(labeled_data, 0, deviation)
     labeled_data2 = ivt.IVT(attacked_data, velocity_threshold)
     print(an.measure_saccade_accuracy(labeled_data, labeled_data2))
-
-original_data = csvu.extract_data("ProcessedDatasets/IVT/S_1004_S2_TEX_IVT.csv")
-watermark_embedding_and_extraction_test(original_data, 1)
-
-#test_gaussian_attack_deviation(original_data, 0.5, 0.03)
-with_noise = csvu.extract_data("ProcessedDatasets/AGWN/S_1004_S2_TEX_WM_AGWN_IVT.csv")
-without_noise = csvu.extract_data("ProcessedDatasets/WIVT/S_1004_S2_TEX_IVT_WM.csv")
-
-noise_watermark = unrun_watermark(with_noise, original_data)
-watermark = unrun_watermark(without_noise, original_data)
-print(an.normalized_cross_correlation(noise_watermark, watermark))
-
-
 
