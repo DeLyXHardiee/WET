@@ -18,6 +18,7 @@ IVT_location = 'ProcessedDatasets/IVT/'
 WIDT_location = 'ProcessedDatasets/WIDT/'
 WIVT_location = 'ProcessedDatasets/WIVT/'
 AGWN_location = 'ProcessedDatasets/AGWN/'
+ADEA_location = 'ProcessedDatasets/ADEA/'
 Results_location = 'Results/'
 
 NO_VALUE = -1
@@ -27,8 +28,6 @@ WIDT_MODE = 'WIDT'
 WIVT_MODE = 'WIVT'
 AGWN_IDT_MODE = 'AGWN_IDT'
 AGWN_IVT_MODE = 'AGWN_IVT'
-NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
-NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
 DEA_IDT_MODE = 'DEA_IDT'
 DEA_IVT_MODE = 'DEA_IVT'
 RPP_IDT_MODE = 'RPP_IDT'
@@ -37,11 +36,14 @@ LIA_IDT_MODE = 'LIA_IDT'
 LIA_IVT_MODE = 'LIA_IVT'
 CA_IDT_MODE = 'CA_IDT'
 CA_IVT_MODE = 'CA_IVT'
+NCC_AGWN_IVT_MODE = 'NCC_AGWN_IVT'
+NCC_AGWN_IDT_MODE = 'NCC_AGWN_IDT'
+NCC_ADEA_IVT_MODE = 'NCC_ADEA_IVT'
+NCC_ADEA_IDT_MODE = 'NCC_ADEA_IDT'
 PLOT_RESULTS_IVT_MODE = 'PLOT_RESULTS_IVT'
 PLOT_RESULTS_IDT_MODE = 'PLOT_RESULTS_IDT'
 DATA_GATHER_IVT = 'DATA_GATHER_IVT'
 DATA_GATHER_IDT = 'DATA_GATHER_IDT'
-
 
 def run_IDT(fileIn, duration_threshold, dispersion_threshold):
     eye_tracking_data = csvu.extract_data(fileIn)
@@ -114,6 +116,50 @@ def run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strengt
     values = [ duration_threshold, dispersion_threshold, strength, standard_deviation, result ]
     csvu.append_result(result_file,values)
 
+def run_ADEA_on_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength, attack_strength):
+    idt_watermarked = run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength)
+    attacked_data = ad.DEA_attack(idt_watermarked,attack_strength)
+    outFile = name_file(fileIn,'WM_ADEA_IDT',ADEA_location)
+    csvu.write_data(outFile, attacked_data)
+    return idt_watermarked, attacked_data
+
+def run_NCC_ADEA_IDT(filename, duration_threshold, dispersion_threshold, strength, attack_strength):
+    original_data = csvu.extract_data(filename)
+    idt_watermarked, attacked_data = run_ADEA_on_IDT_with_watermark(filename,duration_threshold, dispersion_threshold, strength, attack_strength)
+    noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
+    watermark = ew.unrun_watermark(idt_watermarked, original_data, strength)
+    result = an.normalized_cross_correlation(noise_watermark, watermark)
+    result_file = name_file('NCC','ADEA_IDT',Results_location) + '.csv'
+    values = [ duration_threshold, dispersion_threshold, strength, attack_strength, result ]
+    csvu.append_result(result_file,values)
+
+def run_ADEA_on_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength, attack_strength):
+    idt_watermarked = run_IDT_with_watermark(fileIn, duration_threshold, dispersion_threshold, strength)
+    attacked_data = ad.DEA_attack(idt_watermarked,attack_strength)
+    outFile = name_file(fileIn,'WM_ADEA_IDT',ADEA_location)
+    csvu.write_data(outFile, attacked_data)
+    return idt_watermarked, attacked_data
+
+def run_ADEA_on_IVT_with_watermark(fileIn, velocity_threshold, strength, attack_strength):
+    ivt_watermarked = run_IVT_with_watermark(fileIn, velocity_threshold, strength)
+    attacked_data = ad.DEA_attack(ivt_watermarked,attack_strength)
+    outFile = name_file(fileIn,'WM_ADEA_IVT',ADEA_location)
+    csvu.write_data(outFile, attacked_data)
+    return ivt_watermarked, attacked_data
+
+def run_NCC_ADEA_IVT(filename, velocity_threshold, strength, attack_strength):
+    original_data = csvu.extract_data(filename)
+    ivt_watermarked, attacked_data = run_ADEA_on_IVT_with_watermark(filename, velocity_threshold, strength, attack_strength)
+    result = NCC_helper(attacked_data, ivt_watermarked, original_data,strength)
+    result_file = name_file('NCC','ADEA_IVT',Results_location) + '.csv'
+    values = [ velocity_threshold, strength, attack_strength, result ]
+    csvu.append_result(result_file,values)
+
+def NCC_helper(attacked_data, watermarked_data, original_data, strength):
+    noise_watermark = ew.unrun_watermark(attacked_data, original_data, strength)
+    watermark = ew.unrun_watermark(watermarked_data, original_data, strength)
+    result = an.normalized_cross_correlation(noise_watermark, watermark)
+
 def name_file(filename,analysistype,folder):
     file_name, file_extension = os.path.splitext(os.path.basename(filename))
     new_file_name = folder + file_name + '_' + analysistype + file_extension
@@ -178,6 +224,7 @@ def run():
     if 'PLOT' not in mode:
         velocity_threshold = 0.05
         strength = 0.0003
+        attack_strength = 0.0003
         dispersion_threshold = 0.5
         duration_threshold = 100
         standard_deviation = 0.001
@@ -199,11 +246,15 @@ def run():
                 dispersion_threshold = float(sys.argv[4])
             if (len(sys.argv) > 5) & (sys.argv[5] != NO_VALUE):
                 strength = float(sys.argv[5])
-            if (len(sys.argv) > 6) & (sys.argv[6] != NO_VALUE):
-                standard_deviation = float(sys.argv[6])
+            if 'AGWN' in mode:
+                if (len(sys.argv) > 6) & (sys.argv[6] != NO_VALUE):
+                    standard_deviation = float(sys.argv[6])
+            elif 'ADEA' in mode:
+                if (len(sys.argv) > 6) & (sys.argv[6] != NO_VALUE):
+                    attack_strength = float(sys.argv[6])
             if 'PLOT' in mode:
                 if (len(sys.argv) > 7) & (sys.argv[7] != NO_VALUE):
-                    axis = sys.argv[6]
+                    axis = sys.argv[7]
     print(mode)
     if mode == IDT_MODE:
         run_IDT(filename, duration_threshold, dispersion_threshold)
@@ -221,6 +272,10 @@ def run():
         run_NCC_AGWN_IVT(filename, velocity_threshold, strength, standard_deviation)
     elif mode == NCC_AGWN_IDT_MODE:
         run_NCC_AGWN_IDT(filename, duration_threshold, dispersion_threshold, strength, standard_deviation)
+    elif mode == NCC_ADEA_IVT_MODE:
+        run_NCC_ADEA_IVT(filename, velocity_threshold, strength, attack_strength)
+    elif mode == NCC_ADEA_IDT_MODE:
+        run_NCC_ADEA_IDT(filename, duration_threshold, dispersion_threshold, strength, attack_strength)
     elif mode == PLOT_RESULTS_IDT_MODE:
         dictionary = {
             0: duration_threshold if duration_threshold != -1 else None,
