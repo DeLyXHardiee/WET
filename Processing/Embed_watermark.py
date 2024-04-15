@@ -84,7 +84,7 @@ def filter_data(data):
         filtered_data.append(data[i])
     return filtered_data
 
-def run_watermark(data, strength):
+def run_watermark(data, strength=1):
     complex_transformation = get_complex_transformation(data)
     watermark = generate_watermark(len(complex_transformation))
     fft = get_FFT(complex_transformation)
