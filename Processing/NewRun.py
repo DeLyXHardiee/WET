@@ -1,13 +1,18 @@
+import math
 import os
+import random
 
 from matplotlib import pyplot as plt
 import numpy as np
 import Filtering.CSVUtility as csvu
+import Filtering.JSONUtility as jsonu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
 import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
+import random
+from memory_profiler import profile
 import sys
 
 from Context import Context
@@ -157,6 +162,36 @@ def run_NCC(context, fileIn, parameters):
     values = [strength, result]
     csvu.append_result(result_file, values)
 
+def ensure_parameter(context, key, prompt_message):
+    """
+    Ensures that a parameter is available in the context. If not, prompts the user to enter it.
+
+    Args:
+        context (Context): The context object where parameters are stored.
+        key (str): The key for the parameter in the context.
+        prompt_message (str): The message to display when asking the user for input.
+
+    Returns:
+        The value of the parameter, either from the context or input by the user.
+    """
+    # Check if the key exists in the context
+    if not context.has_parameter(key):
+        # Key does not exist, ask the user for input
+        value = input(prompt_message + ": ")
+        try:
+            # Attempt to convert the input to a float if possible
+            value = float(value)
+        except ValueError:
+            # If conversion to float fails, keep it as string (or handle differently)
+            pass
+        # Store the newly obtained value in the context
+        context.add_parameters(key, value)
+    else:
+        # Retrieve the existing value from the context
+        value = context.get_parameters(key)
+
+    return value
+
 
 def name_file(filename, analysistype, folder):
     file_name, file_extension = os.path.splitext(os.path.basename(filename))
@@ -164,10 +199,6 @@ def name_file(filename, analysistype, folder):
     print("new file name : " + new_file_name)
     return folder + file_name + '_' + analysistype + file_extension
 
-
-analysis_modes = {
-    'IVT', 'IDT', 'WM', 'AGWN', 'ARPP', 'ADEA', 'ALIA', 'ACA', 'NCC'
-}
 
 dispatch_table = {
     'IVT': run_IVT,
@@ -190,7 +221,7 @@ def parse_parameters(args):
     ordered_mode_parameters = []
     # Iterate through each argument
     for arg in args[1:]:
-        if arg not in analysis_modes:
+        if arg not in dispatch_table:
             ordered_mode_parameters.append(float(arg))
     return ordered_mode_parameters
 
@@ -200,25 +231,196 @@ def process_pipeline(args, filename):
     while i < len(args):
         mode = args[i]
         if mode in dispatch_table:
+
             # Move to the next element after mode to start capturing parameters
             next_index = i + 1
+
             # Find the next mode start to limit parameter parsing
-            while next_index < len(args) and args[next_index] not in analysis_modes:
+            while next_index < len(args) and args[next_index] not in dispatch_table:
                 next_index += 1
 
             parameters = parse_parameters(args[i:next_index])
             print(f"Executing {mode} with parameters {parameters}")
             filename = dispatch_table[mode](context, filename, parameters)
+
             # Move index past the current mode and its parameters
             i = next_index
         else:
             print(f"Skipping unrecognized mode: {mode}")
             i += 1  # Move to the next potential mode
 
-def run():
-    filename = sys.argv[1]
-    print(filename)
-    args = sys.argv[2:]
-    process_pipeline(args, filename)
+def IVT_all(directory, new_directory):
+    filter_context = "filter_context.json"
+    files = csvu.list_csv_files_in_directory(directory)
+    velocities = {}
+    if jsonu.file_exists(new_directory, filter_context):
+        velocities = jsonu.extract_context(new_directory + filter_context)
+    else:
+        jsonu.create_empty_json(new_directory, filter_context)
+        for file in files:
+            velocities[file] = ivt.find_best_threshold(csvu.extract_data(directory + file))
+        jsonu.write_context_to_json(velocities, new_directory + filter_context)
 
-run()
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+
+
+def WM_all(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "WM_context.json"):
+        jsonu.create_empty_json(new_directory, "WM_context.json")
+    velocities = jsonu.extract_context(directory + "filter_context.json")
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data, watermark = ew.run_watermark(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": random.randint(1, 1000000),
+        "WM_strength": strength,
+        "filter_context_path": directory + "filter_context.json"
+    }
+    jsonu.write_context_to_json(context, new_directory + "WM_context.json")
+
+#IVT_all("../Datasets/Reading/", "ProcessedDatasets/Reading/IVT/CLEAN/")
+
+def AGWN_all_WM(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "attack_context.json"):
+        jsonu.create_empty_json(new_directory, "attack_context.json")
+    context = jsonu.extract_context(directory + "WM_context.json")
+    velocities = jsonu.extract_context(context["filter_context_path"])
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ad.gaussian_white_noise_attack(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": context["WM_ID"],
+        "Attack_type": "AGWN",
+        "AGWN_strength": strength,
+        "filter_context_path": context["filter_context_path"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "attack_context.json")
+
+def DEA_all_WM(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "attack_context.json"):
+        jsonu.create_empty_json(new_directory, "attack_context.json")
+    context = jsonu.extract_context(directory + "WM_context.json")
+    velocities = jsonu.extract_context(context["filter_context_path"])
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ad.DEA_attack(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": context["WM_ID"],
+        "Attack_type": "DEA",
+        "DEA_strength": strength,
+        "filter_context_path": context["filter_context_path"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "attack_context.json")
+
+def RRP_all_WM(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "attack_context.json"):
+        jsonu.create_empty_json(new_directory, "attack_context.json")
+    context = jsonu.extract_context(directory + "WM_context.json")
+    velocities = jsonu.extract_context(context["filter_context_path"])
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ad.RRP_attack(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": context["WM_ID"],
+        "Attack_type": "RRP",
+        "RRP_strength": strength,
+        "filter_context_path": context["filter_context_path"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "attack_context.json")
+
+def LIA_all_WM(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "attack_context.json"):
+        jsonu.create_empty_json(new_directory, "attack_context.json")
+    context = jsonu.extract_context(directory + "WM_context.json")
+    velocities = jsonu.extract_context(context["filter_context_path"])
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ad.LIA_attack(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": context["WM_ID"],
+        "Attack_type": "LIA",
+        "LIA_strength": strength,
+        "filter_context_path": context["filter_context_path"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "attack_context.json")
+
+
+def CA_all_WM(directory, new_directory, strength):
+    files = csvu.list_csv_files_in_directory(directory)
+    if not jsonu.file_exists(new_directory, "attack_context.json"):
+        jsonu.create_empty_json(new_directory, "attack_context.json")
+    context = jsonu.extract_context(directory + "WM_context.json")
+    velocities = jsonu.extract_context(context["filter_context_path"])
+    for file in files:
+        data = csvu.extract_data(directory + file)
+        velocity = velocities[file]
+        data = ad.CA_attack(data, strength)
+        data = ivt.IVT(data, velocity)
+        csvu.write_data(new_directory + file, data)
+    context = {
+        "WM_ID": context["WM_ID"],
+        "Attack_type": "CA",
+        "CA_strength": strength,
+        "filter_context_path": context["filter_context_path"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "attack_context.json")
+
+def run_NCC_on_attack(clean_directory, WM_directory, attacked_directory, new_directory):
+    clean_files = csvu.list_csv_files_in_directory(clean_directory)
+    WM_files = csvu.list_csv_files_in_directory(WM_directory)
+    attacked_files = csvu.list_csv_files_in_directory(attacked_directory)
+    if not jsonu.file_exists(new_directory, "analyze_context.json"):
+        jsonu.create_empty_json(new_directory, "analyze_context.json")
+    WM_context = jsonu.extract_context(WM_directory + "WM_context.json")
+    attack_context = jsonu.extract_context(attacked_directory + "attack_context.json")
+    scores = {}
+    for i in range(0, len(clean_files)):
+        print("Performing NCC for: " + clean_files[i])
+        clean_data = csvu.extract_data(clean_directory + clean_files[i])
+        WM_data = csvu.extract_data(WM_directory + WM_files[i])
+        attacked_data = csvu.extract_data(attacked_directory + attacked_files[i])
+        original_wm = ew.unrun_watermark(WM_data, clean_data, WM_context["WM_strength"])
+        attacked_wm = ew.unrun_watermark(attacked_data, clean_data, WM_context["WM_strength"])
+        ncc_score = an.normalized_cross_correlation(original_wm, attacked_wm)
+        scores[clean_files[i]] = ncc_score
+
+    context = {
+        "Analysis": "NCC",
+        "Scores": scores,
+        "Mean_score": np.mean(list(scores.values())),
+        "Attack_type": attack_context["Attack_type"],
+        "Attack_strength": attack_context[attack_context["Attack_type"] + "_strength"],
+        "WM_strength": WM_context["WM_strength"]
+    }
+    jsonu.write_context_to_json(context, new_directory + "analyze_context.json")
+
+
+#IVT_all("../Datasets/Reading/" ,"ProcessedDatasets/CLEAN/Reading/")
+#WM_all("ProcessedDatasets/CLEAN/Reading/", "ProcessedDatasets/WM/Reading/", 1)
+AGWN_all_WM("ProcessedDatasets/WM/Reading/", "ProcessedDatasets/WM_ATTACKED/Reading/GWN/", 0.001)
+
+run_NCC_on_attack("ProcessedDatasets/CLEAN/Reading/", "ProcessedDatasets/WM/Reading/", "ProcessedDatasets/WM_ATTACKED/Reading/GWN/", "ProcessedDatasets/ANALYSIS/")

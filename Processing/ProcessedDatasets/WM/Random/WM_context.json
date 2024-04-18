@@ -1,0 +1,5 @@
+{
+    "WM_ID" : 123,
+    "strength": 1,
+    "filter_context_path": "parent"
+}

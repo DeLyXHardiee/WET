@@ -1,0 +1,6 @@
+{
+    "WM_ID": 842700,
+    "Attack_type": "AGWN",
+    "AGWN_strength": 0.001,
+    "filter_context_path": "ProcessedDatasets/CLEAN/Reading/filter_context.json"
+}

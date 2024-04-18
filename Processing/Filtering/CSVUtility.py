@@ -2,6 +2,74 @@ from csv import writer
 import os
 import pandas as pd
 import numpy as np
+import csv
+
+def file_exists(directory, filename):
+    """ Check if a file exists in a directory using os.path. """
+    # Build the full file path
+    file_path = os.path.join(directory, filename)
+    # Check if the file exists
+    return os.path.exists(file_path)
+
+def list_csv_files_in_directory(directory):
+    """ List all CSV files in a given directory using the os module. """
+    # Get all entries in the directory specified
+    all_entries = os.listdir(directory)
+    # Filter out directories and only keep files with a .csv extension
+    csv_files = [entry for entry in all_entries if os.path.isfile(os.path.join(directory, entry)) and entry.endswith('.csv')]
+    return csv_files
+
+def extract_velocities(csv_file_path):
+    # Read the CSV file using pandas
+    df = pd.read_csv(csv_file_path)
+
+    # Assuming the columns are named 'file' and 'v'
+    file_column = df['file']
+    v_column = df['v']
+
+    # Create a dictionary where 'file' is the key and 'v' is the value
+    file_to_v_map = dict(zip(file_column, v_column))
+
+    return file_to_v_map
+
+def create_empty_velocity_csv(folder_path, file_name):
+    """
+    Creates an empty CSV file with specified headers in a given folder.
+
+    Args:
+    folder_path (str): The path to the folder where the CSV should be created.
+    file_name (str): The name of the CSV file to create.
+    """
+    # Ensure the folder exists, if not, create it
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Full path for the new CSV file
+    file_path = os.path.join(folder_path, file_name)
+
+    # Open the file in write mode and create it with headers
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        # Example headers - modify as needed
+        headers = ["file", "v"]
+        writer.writerow(headers)
+
+    print(f"Empty CSV file created at {file_path}")
+
+def write_velocities_to_csv(file_v_map, file_path):
+    """
+    Writes a dictionary to a CSV file with columns 'file' and 'v'.
+
+    Args:
+    file_v_map (dict): Dictionary where keys are 'file' and values are 'v'.
+    file_path (str): Path to the CSV file to be written.
+    """
+    # Create a DataFrame from the dictionary
+    df = pd.DataFrame(list(file_v_map.items()), columns=['file', 'v'])
+
+    # Write the DataFrame to a CSV file
+    df.to_csv(file_path, index=False)
+
+    print(f"Data written to {file_path} successfully.")
 
 def extract_data(csv_file_path):
     # Read the Excel file into a pandas DataFrame
@@ -61,7 +129,7 @@ def filter_data(data):
     return filtered_data
 
 def write_data(csv_filename, data):
-    print(str(csv_filename) + str(len(data)))
+    print(str(csv_filename))
     df = pd.DataFrame(data, columns=['n', 'x', 'y', 'lab'])
     df.to_csv(csv_filename, index=False)
 

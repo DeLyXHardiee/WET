@@ -1,4 +1,5 @@
 import numpy as np
+from memory_profiler import profile
 
 def measure_saccade_accuracy(true_data, predicted_data):
     if len(true_data) != len(predicted_data):
@@ -28,5 +29,6 @@ def normalized_cross_correlation(signal1, signal2):
     # Convert signals to numpy arrays
     signal1 = np.array(signal1)
     signal2 = np.array(signal2)
+    print("NCC")
 
     return np.corrcoef(signal1, signal2)[0, 1]
