@@ -1,0 +1,39 @@
+{
+    "First_directory_context": {
+        "S_1009_S1_TEX.csv": 0.05,
+        "S_1010_S1_TEX.csv": 0.05,
+        "S_1009_S2_TEX.csv": 0.05,
+        "S_1004_S2_TEX.csv": 0.05,
+        "S_1010_S2_TEX.csv": 0.05,
+        "S_1011_S1_TEX.csv": 0.05,
+        "S_1005_S1_TEX.csv": 0.05,
+        "S_1007_S2_TEX.csv": 0.06,
+        "S_1008_S1_TEX.csv": 0.04,
+        "S_1011_S2_TEX.csv": 0.05,
+        "S_1007_S1_TEX.csv": 0.06,
+        "S_1008_S2_TEX.csv": 0.05,
+        "S_1005_S2_TEX.csv": 0.05
+    },
+    "Second_directory": {
+        "WM_ID": 797509,
+        "WM_strength": 1,
+        "filter_context_path": "ProcessedDatasets/CLEAN/Reading/context.json"
+    },
+    "Analysis": "Saccade Accuracy",
+    "Scores": {
+        "S_1009_S1_TEX.csv": 0.9854912256459859,
+        "S_1010_S1_TEX.csv": 0.9862494073020389,
+        "S_1009_S2_TEX.csv": 0.9844722373270497,
+        "S_1004_S2_TEX.csv": 0.989879414298019,
+        "S_1010_S2_TEX.csv": 0.9850920404459425,
+        "S_1011_S1_TEX.csv": 0.9863478334605275,
+        "S_1005_S1_TEX.csv": 0.990202885134614,
+        "S_1007_S2_TEX.csv": 0.9860369225002342,
+        "S_1008_S1_TEX.csv": 0.9872127680030767,
+        "S_1011_S2_TEX.csv": 0.9897550111358574,
+        "S_1007_S1_TEX.csv": 0.9892452092295659,
+        "S_1008_S2_TEX.csv": 0.9884115884115884,
+        "S_1005_S2_TEX.csv": 0.9887774951369145
+    },
+    "Mean_score": 0.9874749260024166
+}
