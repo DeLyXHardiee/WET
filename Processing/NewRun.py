@@ -15,21 +15,6 @@ import random
 import sys
 from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor
 
-
-reading_datasets_location = '../Datasets/Reading/'
-random_datasets_location = '../Datasets/Random/'
-datasets_processed_location = '../ProcessedDatasets/'
-IDT_location = 'ProcessedDatasets/IDT/'
-IVT_location = 'ProcessedDatasets/IVT/'
-WIDT_location = 'ProcessedDatasets/WIDT/'
-WIVT_location = 'ProcessedDatasets/WIVT/'
-AGWN_location = 'ProcessedDatasets/AGWN/'
-ALIA_location = 'ProcessedDatasets/ALIA/'
-ARRP_location = 'ProcessedDatasets/RRP/'
-ADEA_location = 'ProcessedDatasets/ADEA/'
-ACA_location = 'ProcessedDatasets/ACA/'
-Results_location = 'Results/'
-
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,

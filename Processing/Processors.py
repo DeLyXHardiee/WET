@@ -59,7 +59,6 @@ class IVTProcessor(DataProcessor):
     def create_new_context(self):
         new_context = {}
         files = csvu.list_csv_files_in_directory(self.current_directory)
-        print(files)
         for file in files:
             new_context[file] = ivt.find_best_threshold(csvu.extract_data(self.current_directory + file))
         new_context["Dataset"] = self.current_context["Dataset"]

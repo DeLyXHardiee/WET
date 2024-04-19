@@ -1,0 +1,7 @@
+{
+    "Dataset": "RandomSaccades",
+    "WM_ID": 963874,
+    "Attack_type": "GWN",
+    "Strength": 0.001,
+    "filter_context_path": "ProcessedDatasets/CLEAN/RandomSaccades/context.json"
+}
