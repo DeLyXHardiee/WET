@@ -14,7 +14,6 @@ import Analyze as an
 import random
 import sys
 from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor
-from memory_profiler import profile
 
 
 reading_datasets_location = '../Datasets/Reading/'
@@ -84,6 +83,23 @@ def process_pipeline(args, filename):
             print(f"Skipping unrecognized mode: {mode}")
             i += 1  # Move to the next potential mode
 
+
+def plot_comparison(first_file, second_file, strength):
+    first_data = csvu.extract_data(first_file)
+    second_data = csvu.extract_data(second_file)
+    _,first_data_x,first_data_y,_ = list(zip(*first_data))
+    _,second_data_x,second_data_y,_ = list(zip(*second_data))
+    plt.figure()
+    plt.scatter(first_data_x, first_data_y, color='blue', label='Original data', s= 0.5)
+    plt.scatter(second_data_x, second_data_y, color='#fc8403', label='Watermarked data', s= 0.5)
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+    plt.legend()
+    plt.xlim(-7,7)
+    plt.ylim(-6,6)
+    plt.title('Strength: ' +str(strength))
+    plt.show()
 
 def main():
     # Get command-line arguments excluding the script name
