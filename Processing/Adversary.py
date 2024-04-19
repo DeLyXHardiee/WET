@@ -2,7 +2,7 @@ import numpy as np
 from Embed_watermark import *
 
 #NOISE ATTACK
-def gaussian_white_noise_attack(data, std=0.1):
+def GWN_attack(data, std=0.1):
     mean=0
     attacked_data = []
     for point in data:
