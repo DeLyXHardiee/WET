@@ -12,7 +12,7 @@ import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
 import random
-from memory_profiler import profile
+#from memory_profiler import profile
 import sys
 
 from Context import Context
@@ -439,6 +439,24 @@ def run_saccade_accuracy(first_directory, second_directory, new_directory):
         "Mean_score": np.mean(list(scores.values())),
     }
     jsonu.write_context_to_json(context, new_directory + "context.json")
+
+def plot_comparison(first_file, second_file, strength):
+    first_data = csvu.extract_data(first_file)
+    second_data = csvu.extract_data(second_file)
+    _,first_data_x,first_data_y,_ = list(zip(*first_data))
+    _,second_data_x,second_data_y,_ = list(zip(*second_data))
+    plt.figure()
+    plt.scatter(first_data_x, first_data_y, color='blue', label='Original data', s= 0.5)
+    plt.scatter(second_data_x, second_data_y, color='#fc8403', label='Watermarked data', s= 0.5)
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+    plt.legend()
+    plt.xlim(-7,7)
+    plt.ylim(-6,6)
+    plt.title('Strength: ' +str(strength))
+    plt.show()
+
 
 #IVT_all("../Datasets/Reading/" ,"ProcessedDatasets/CLEAN/Reading/")
 #WM_all("ProcessedDatasets/CLEAN/Reading/", "ProcessedDatasets/WM/Reading/", 1)
