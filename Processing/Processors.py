@@ -192,7 +192,7 @@ class SaccadeProcessor(DataProcessor):
         self.analysis_type = "SACC"
         self.target_directory = self.create_target_directory()
         self.analysis = {}
-        self.degrees = -1
+        self.degrees = {}
 
     def process_data(self):
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
@@ -201,7 +201,7 @@ class SaccadeProcessor(DataProcessor):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
-            self.degrees = an.measure_degrees_of_visual_angle(data,truth)
+            self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
         self.create_new_context()
         return self.target_directory
 
