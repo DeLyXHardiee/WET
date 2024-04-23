@@ -1,6 +1,6 @@
 {
     "Dataset": "Reading",
-    "WM_ID": 26436,
-    "WM_strength": 1.0,
+    "WM_ID": 256187,
+    "WM_strength": 10.0,
     "filter_context_path": "ProcessedDatasets/CLEAN/Reading/context.json"
 }
