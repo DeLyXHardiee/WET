@@ -124,3 +124,5 @@ def test_gaussian_attack_deviation(data, velocity_threshold, deviation):
     labeled_data2 = ivt.IVT(attacked_data, velocity_threshold)
     print(an.measure_saccade_accuracy(labeled_data, labeled_data2))
 
+print(an.measure_rms_precision(csvu.extract_data("../Datasets/RandomSaccades/S_1005_S2_RAN.csv")))
+print(an.measure_rms_precision(csvu.extract_data("ProcessedDatasets/WM/Reading/S_1005_S2_TEX.csv")))
