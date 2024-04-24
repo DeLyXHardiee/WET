@@ -25,14 +25,6 @@ def calculate_label_accuracy(true_labels, predicted_labels):
     accuracy = correct_predictions / total_points
     return accuracy
 
-def calculate_velocity(point1, point2):
-    """Calculate velocity between two points."""
-    dx = point2[1] - point1[1]
-    dy = point2[2] - point1[2]
-    dt = point2[0] - point1[0]
-    velocity = np.sqrt(dx**2 + dy**2) / dt
-    return velocity
-
 def filter_data(data):
     filtered_data = []
     for i in range(len(data)):
@@ -60,6 +52,14 @@ def IVT(protocol, velocity_threshold=0):
             else:
                 fixations.append((point[0], point[1], point[2], 2))
     return fixations
+
+def calculate_velocity(point1, point2):
+    """Calculate velocity between two points."""
+    dx = point2[1] - point1[1]
+    dy = point2[2] - point1[2]
+    dt = point2[0] - point1[0]
+    velocity = np.sqrt(dx**2 + dy**2) / dt
+    return velocity
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
