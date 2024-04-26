@@ -193,6 +193,7 @@ class SaccadeProcessor(DataProcessor):
         self.target_directory = self.create_target_directory()
         self.analysis = {}
         self.degrees = {}
+        self.rms = {}
 
     def process_data(self):
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
@@ -202,6 +203,7 @@ class SaccadeProcessor(DataProcessor):
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
+            self.rms[current_files[i]] = an.measure_rms_precision(data)
         self.create_new_context()
         return self.target_directory
 
@@ -213,6 +215,9 @@ class SaccadeProcessor(DataProcessor):
             "Scores": self.analysis,
             "Mean_score": np.mean(list(self.analysis.values())),
             "Degrees": self.degrees,
+            "Mean_degrees": np.mean(list(self.degrees.values())),
+            "RMS": self.rms,
+            "Mean_RMS": np.mean(list(self.rms.values())),
         }
         jsonu.write_context_to_json(new_context, self.target_directory + "context.json")
 

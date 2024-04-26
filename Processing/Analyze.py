@@ -2,19 +2,17 @@ import numpy as np
 import math
 from memory_profiler import profile
 
-eyes = np.array([0.0,3.6,55.0])
-
 def measure_saccade_accuracy(true_data, predicted_data):
     if len(true_data) != len(predicted_data):
-        print("Truth: " + str(len(true_data)))
-        print("Predicted: " + str(len(predicted_data)))
+        #print("Truth: " + str(len(true_data)))
+        #print("Predicted: " + str(len(predicted_data)))
         raise ValueError("Length of true data and predicted data must be the same")
 
     # Extract saccade labels from true and predicted data
     true_saccades = [point for point in true_data if point[3] == 2]
     predicted_saccades = [point for point in predicted_data if point[3] == 2]
-    print("Truth: " + str(len(true_saccades)))
-    print("Predicted: " + str(len(predicted_saccades)))
+    #print("Truth: " + str(len(true_saccades)))
+    #print("Predicted: " + str(len(predicted_saccades)))
 
     # Calculate intersection of true and predicted saccades
     true_positives = 0
@@ -154,6 +152,4 @@ def normalized_cross_correlation(signal1, signal2):
     # Convert signals to numpy arrays
     signal1 = np.array(signal1)
     signal2 = np.array(signal2)
-    print("NCC")
-
     return np.corrcoef(signal1, signal2)[0, 1]

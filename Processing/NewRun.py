@@ -18,7 +18,7 @@ from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor,
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,
-    "Attack": AttackProcessor,
+    "ATTACK": AttackProcessor,
     "NCC": NCCProcessor,
     "SACC": SaccadeProcessor
 }

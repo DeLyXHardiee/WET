@@ -126,8 +126,8 @@ def test_gaussian_attack_deviation(data, velocity_threshold, deviation):
     print(an.measure_saccade_accuracy(labeled_data, labeled_data2))
 
 
-data = np.array(csvu.extract_data("../Datasets/RandomSaccades/S_9016_S1_RAN.csv"))
-print(len(data))
-#new_data = el.classify_eye_movements(data)
-new_data = ivt.IVT(data)
-print(an.measure_saccade_accuracy(data, new_data))
+
+#data = np.array(csvu.extract_data("../Datasets/RandomSaccades/S_9016_S1_RAN.csv"))
+#print(an.measure_rms_precision(data))
+#data = np.array(csvu.extract_data("ProcessedDatasets/WM/RandomSaccades/S_9016_S1_RAN.csv"))
+#print(an.measure_rms_precision(data))
