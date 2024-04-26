@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from memory_profiler import profile
 
 eyes = np.array([0.0,3.6,55.0])
@@ -62,14 +63,37 @@ def calculate_rms(fixation):
 #go through points in dataset before modifictaion and after and measure the degree of change in the two datapoints
 def measure_degrees_of_visual_angle(modifiedData, unmodifiedData):
     acc = 0
+    nanCounter = 0
+    max = 0
     for i in range(len(unmodifiedData)):
+        if np.isnan(unmodifiedData[i][1]):
+            nanCounter += 1
+            continue
         #print(unmodifiedData[i])
-        a = np.array([unmodifiedData[i][1],unmodifiedData[i][2],0.0])
+        p1 = [unmodifiedData[i][1],unmodifiedData[i][2]]
         #print(a)
-        b = np.array([modifiedData[i][1],modifiedData[i][2],0.0])
-        acc += angle_between_points(a,eyes,b)
-    return acc/len(unmodifiedData)
-
+        p2 = [modifiedData[i][1],modifiedData[i][2]]
+        dist = math.dist(p1,p2)
+        acc += dist
+        if dist > max:
+            max = dist
+    print("max: " + str(max))
+    return acc/(len(unmodifiedData)-nanCounter)
+'''
+def measure_degrees_of_visual_angle(data):
+    acc = 0
+    nanCounter = 0
+    for i in range(len(data)):
+        #print(data[i])
+        p1 = [data[i][1],data[i][2]]
+        #print(a)
+        p2 = [data[i][4],data[i][5]]
+        dist = math.dist(p1,p2)        
+        acc += dist
+        #if dist > 10:
+        #    print(dist)
+    return acc/(len(data)-nanCounter)    
+'''
 def angle_between_points(A, B, C):
     # Calculate vectors AB and BC
     BA = A - B
