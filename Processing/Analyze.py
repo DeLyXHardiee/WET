@@ -44,7 +44,7 @@ def measure_rms_precision(data):
                 fixation_rms_results.append(fixation_result)
                 current_fixation = []
     if current_fixation:
-        fixation_result = calculate_rms(current_fixation)
+        fixation_result = calculate_inter_sample_angular_distance(current_fixation)
         fixation_rms_results.append(fixation_result)
 
     average_rms = sum(fixation_rms_results) / len(fixation_rms_results) if fixation_rms_results else 0
