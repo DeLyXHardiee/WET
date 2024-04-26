@@ -1,17 +1,22 @@
 import numpy as np
 import sys
 import os
+
 parent_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(parent_dir)
+import CSVUtility as csvu
 import Analyze as an
 
+
 import math
+
 
 def check_for_nan(number):
     if math.isnan(number):
         return True
     else:
         return False
+
 
 def calculate_label_accuracy(true_labels, predicted_labels):
     if len(true_labels) != len(predicted_labels):
@@ -25,6 +30,7 @@ def calculate_label_accuracy(true_labels, predicted_labels):
     accuracy = correct_predictions / total_points
     return accuracy
 
+
 def filter_data(data):
     filtered_data = []
     for i in range(len(data)):
@@ -33,7 +39,10 @@ def filter_data(data):
         filtered_data.append(data[i])
     return filtered_data
 
+
 """I-VT algorithm without fixation groups"""
+
+
 def IVT(protocol, velocity_threshold=0):
     if velocity_threshold == 0:
         velocity_threshold = find_best_threshold(protocol)
@@ -44,22 +53,21 @@ def IVT(protocol, velocity_threshold=0):
             fixations.append(point)
         else:
             velocity = calculate_velocity(fixations[-1], point)
-            if check_for_nan(velocity):
-                #fixations.append(point)
-                continue
             if velocity < velocity_threshold:
                 fixations.append((point[0], point[1], point[2], 1))
             else:
                 fixations.append((point[0], point[1], point[2], 2))
     return fixations
 
+
 def calculate_velocity(point1, point2):
     """Calculate velocity between two points."""
     dx = point2[1] - point1[1]
     dy = point2[2] - point1[2]
     dt = point2[0] - point1[0]
-    velocity = np.sqrt(dx**2 + dy**2) / dt
+    velocity = np.sqrt(dx ** 2 + dy ** 2) / dt
     return velocity
+
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
@@ -84,3 +92,21 @@ def find_best_threshold(protocol):
             best_f1_score = f1_score
 
     return best_threshold
+
+
+def IVT(protocol, velocity_threshold=0.05):
+    if velocity_threshold == 0:
+        velocity_threshold = find_best_threshold(protocol)
+    fixations = []
+    fixations.append(protocol[0])
+    for i in range(1, len(protocol)):
+        point = protocol[i]
+        if (len(fixations) == 0):
+            fixations.append(point)
+        else:
+            velocity = calculate_velocity(fixations[-1], point)
+            if velocity < velocity_threshold:
+                fixations.append((point[0], point[1], point[2], 1))
+            else:
+                fixations.append((point[0], point[1], point[2], 2))
+    return fixations
