@@ -15,15 +15,15 @@ def get_complex_transformation(data):
     return complex_numbers
 
 def generate_watermark(length):
-    maxZeros = int(length*0.375)
+    maxZeros = 0#int(length*0.375)
     watermark = np.array([])
     zerosCounter = 0
     while len(watermark) < length:
         randomnr = random.randint(-1,1)
         if randomnr == 0:
-            zerosCounter += 1
-        if zerosCounter > maxZeros:
-            continue
+            continue#zerosCounter += 1
+        #if zerosCounter > maxZeros:
+        #    continue
         watermark = np.append(watermark,randomnr)
     return watermark
 

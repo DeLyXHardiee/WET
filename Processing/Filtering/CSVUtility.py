@@ -109,6 +109,15 @@ def extract_data_with_true_point(csv_file_path):
     })
     return filter_data(extracted_data.apply(lambda row: (row['n'], row['x'], row['y'],row['xT'],row['yT'], row['lab']), axis=1))
 
+def extract_results2(csv_file_path):
+    df = pd.read_csv(csv_file_path)
+    strengths = df['S']
+    saccadeAccuracies = df['SA']
+    extracted_data = pd.DataFrame({
+            'S': strengths,
+            'SA': saccadeAccuracies,
+            })
+    return extracted_data.apply(lambda row: (row['S'], row['SA']), axis=1)
 
 def extract_results(csv_file_path):
     print(csv_file_path)
@@ -140,7 +149,6 @@ def extract_results(csv_file_path):
             'NCC': results
         })
         return filter_data(extracted_data.apply(lambda row: (row['VT'], row['S'], row['SD'], row['NCC']), axis=1))
-
 
 def filter_data(data):
     filtered_data = []

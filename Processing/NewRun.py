@@ -86,6 +86,21 @@ def plot_comparison(first_file, second_file, strength):
     plt.title('Strength: ' +str(strength))
     plt.show()
 
+def plot_results(filename):
+    data = csvu.extract_results2(filename)
+    data_x,data_y = list(zip(*data))
+    plt.figure()
+    plt.scatter(data_x, data_y, color='blue', s= 0.5)
+    plt.xlabel('WM_Strength')
+    plt.ylabel('Saccade Accuracy')
+    plt.grid(True)
+    plt.title('Watermark embedding utility')
+    results_location = '/Results/Plots/'
+    plot = results_location + "S_SA_" + filename[8:-4] + ".png"
+    print(plot)
+    plt.savefig("Results/Plots/S_SA.png")
+    plt.show()
+
 def main():
     # Get command-line arguments excluding the script name
     args = sys.argv[1:]
@@ -102,7 +117,10 @@ def main():
     process_pipeline(args, filename)
 
 if __name__ == "__main__":
+    #plot_results('Results/SaccadeAccuracies.csv')
     main()
+
+
 
 #Run examples
 #Watermark

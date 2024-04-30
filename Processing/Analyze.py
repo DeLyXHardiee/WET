@@ -92,7 +92,6 @@ def measure_degrees_of_visual_angle(modifiedData, unmodifiedData):
         acc += dist
         if dist > max:
             max = dist
-    print("max: " + str(max))
     return acc/(len(unmodifiedData)-nanCounter)
 
 def angle_between_points(A, B, C):

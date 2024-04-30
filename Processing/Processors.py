@@ -205,6 +205,7 @@ class SaccadeProcessor(DataProcessor):
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
             self.rms[current_files[i]] = an.measure_rms_precision(data)
         self.create_new_context()
+        csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
 
     def create_new_context(self):
@@ -218,6 +219,7 @@ class SaccadeProcessor(DataProcessor):
             "Mean_degrees": np.mean(list(self.degrees.values())),
             "RMS": self.rms,
             "Mean_RMS": np.mean(list(self.rms.values())),
+            "WM_Strength": self.current_context['WM_strength']
         }
         jsonu.write_context_to_json(new_context, self.target_directory + "context.json")
 
