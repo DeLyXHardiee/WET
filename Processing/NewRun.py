@@ -13,13 +13,14 @@ import Adversary as ad
 import Analyze as an
 import random
 import sys
-from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor
+from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor, AttackNCCProcessor
 
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,
     "ATTACK": AttackProcessor,
     "NCC": NCCProcessor,
+    "ATTACKNCC": AttackNCCProcessor,
     "SACC": SaccadeProcessor
 }
 
@@ -101,6 +102,27 @@ def plot_results(filename):
     plt.savefig("Results/Plots/S_SA.png")
     plt.show()
 
+def plot_attack_results(filename, attackType):
+    data = []
+    with open(filename, 'r') as file:
+        reader = csvu.get_reader(file)
+        next(reader)  # Skip header
+        for row in reader:
+            if row[0] == attackType:
+                data.append((float(row[1]), float(row[2])))
+    if not data:
+        print("No data found for the given attack type.")
+        return 
+    data_x,data_y = list(zip(*data))
+    plt.figure()
+    plt.scatter(data_x, data_y, color='blue', s= 0.5)
+    plt.xlabel('Attack Variable')
+    plt.ylabel('Normalized Cross Correlation')
+    plt.grid(True)
+    plt.title(f'Attack Type: {attackType}')
+    plt.savefig(f'Results/Plots/{attackType}_plot.png')
+    plt.show()
+
 def main():
     # Get command-line arguments excluding the script name
     args = sys.argv[1:]
@@ -118,6 +140,7 @@ def main():
 
 if __name__ == "__main__":
     #plot_results('Results/SaccadeAccuracies.csv')
+    #plot_attack_results('Results/NCC_AT_AV.csv', "GWN")
     main()
 
 

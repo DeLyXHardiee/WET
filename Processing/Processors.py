@@ -186,6 +186,16 @@ class NCCProcessor(DataProcessor):
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"
 
+class AttackNCCProcessor(DataProcessor):
+    def __init__(self, current_directory, attack_type, strength):
+        self.attack_processor = AttackProcessor(current_directory, attack_type, strength)
+
+    def process_data(self):
+        attacked_data_directory = self.attack_processor.process_data()
+        ncc_processor = NCCProcessor(attacked_data_directory)
+        ncc_processor.process_data()
+        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values()))))
+
 class SaccadeProcessor(DataProcessor):
     def __init__(self, current_directory):
         super().__init__(current_directory)

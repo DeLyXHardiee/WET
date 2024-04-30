@@ -169,3 +169,6 @@ def append_result(csv_filename, values):
         writer_object = writer(f_object)
         writer_object.writerow(values)
         f_object.close()
+
+def get_reader(file):
+    return csv.reader(file)
