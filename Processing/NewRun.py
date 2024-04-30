@@ -89,9 +89,9 @@ def plot_comparison(first_file, second_file, strength):
 
 def plot_results(filename):
     data = csvu.extract_results2(filename)
-    data_x,data_y = list(zip(*data))
+    data_x,data_y,visualDegrees,rms = list(zip(*data))
     plt.figure()
-    plt.scatter(data_x, data_y, color='blue', s= 0.5)
+    plt.scatter(data_x, data_y, color='blue', s= 1)
     plt.xlabel('WM_Strength')
     plt.ylabel('Saccade Accuracy')
     plt.grid(True)
