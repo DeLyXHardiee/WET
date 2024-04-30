@@ -150,3 +150,7 @@ if __name__ == "__main__":
 #py .\NewRun.py ProcessedDataSets/CLEAN/RandomSaccades/ WM 1
 #Saccade accuracy
 #py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ SACC
+#Attack
+#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ ATTACK GWN 0.001
+#NCC
+#py .\NewRun.py ProcessedDataSets/WM_ATTACKED/RandomSaccades/GWN/ NCC
