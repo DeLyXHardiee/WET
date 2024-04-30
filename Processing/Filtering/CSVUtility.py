@@ -113,11 +113,15 @@ def extract_results2(csv_file_path):
     df = pd.read_csv(csv_file_path)
     strengths = df['S']
     saccadeAccuracies = df['SA']
+    visualDegrees = df['VD']
+    rms = df['RMS']
     extracted_data = pd.DataFrame({
             'S': strengths,
             'SA': saccadeAccuracies,
+            'VD': visualDegrees,
+            'RMS': rms,
             })
-    return extracted_data.apply(lambda row: (row['S'], row['SA']), axis=1)
+    return extracted_data.apply(lambda row: (row['S'], row['SA'], row['VD'], row['RMS']), axis=1)
 
 def extract_results(csv_file_path):
     print(csv_file_path)
