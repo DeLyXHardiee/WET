@@ -117,8 +117,8 @@ def main():
     process_pipeline(args, filename)
 
 if __name__ == "__main__":
-    plot_results('Results/SaccadeAccuracies.csv')
-    #main()
+    #plot_results('Results/SaccadeAccuracies.csv')
+    main()
 
 
 
