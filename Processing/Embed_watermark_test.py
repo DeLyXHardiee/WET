@@ -66,7 +66,7 @@ class TestWatermarkFunctions(unittest.TestCase):
         watermarked_data, original_watermark = run_watermark(data, strength)
         extracted_watermark = unrun_watermark(watermarked_data, data, strength)
         # Check if extracted watermark matches original watermark
-        self.assertTrue(np.array_equal(original_watermark, np.round(extracted_watermark)))
+        self.assertTrue(np.array_equal(original_watermark, extracted_watermark))
 
     def test_watermark_difference(self):
         # Generate test data
