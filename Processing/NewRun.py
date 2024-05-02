@@ -13,7 +13,7 @@ import Adversary as ad
 import Analyze as an
 import random
 import sys
-from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor, AttackNCCProcessor
+from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor, AttackAnalysisProcessor
 
 dispatch_table = {
     "IVT": IVTProcessor,
@@ -21,7 +21,7 @@ dispatch_table = {
     "ATTACK": AttackProcessor,
     "NCC": NCCProcessor,
     "NCCL": NCCProcessorWithLength,
-    "ATTACKNCC": AttackNCCProcessor,
+    "ATTACK_ANALYSIS": AttackAnalysisProcessor,
     "SACC": SaccadeProcessor
 }
 

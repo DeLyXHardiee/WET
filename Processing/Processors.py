@@ -9,7 +9,7 @@ import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
-import W_Trace_Watermark as ew
+import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
 import random
@@ -138,7 +138,8 @@ class AttackProcessor(DataProcessor):
             "WM_ID": context["WM_ID"],
             "Attack_type": self.attack_type,
             "Strength": self.strength,
-            "filter_context_path": context["filter_context_path"]
+            "filter_context_path": context["filter_context_path"],
+            "WM_strength": self.current_context["WM_strength"]
         }
         jsonu.write_context_to_json(context, self.target_directory + self.context_file)
 
@@ -249,7 +250,7 @@ class NCCProcessorWithLength(DataProcessor):
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"
 
-class AttackNCCProcessor(DataProcessor):
+class AttackAnalysisProcessor(DataProcessor):
     def __init__(self, current_directory, attack_type, strength):
         self.attack_processor = AttackProcessor(current_directory, attack_type, strength)
 
@@ -257,7 +258,13 @@ class AttackNCCProcessor(DataProcessor):
         attacked_data_directory = self.attack_processor.process_data()
         ncc_processor = NCCProcessor(attacked_data_directory)
         ncc_processor.process_data()
-        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values()))))
+        saccade_processor = SaccadeProcessor(attacked_data_directory)
+        saccade_processor.process_data()
+        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength, 
+                                                    np.mean(list(ncc_processor.analysis.values())),
+                                                    np.mean(list(saccade_processor.analysis.values())),
+                                                    np.mean(list(saccade_processor.degrees.values())),
+                                                    np.mean(list(saccade_processor.rms.values()))))
 
 class SaccadeProcessor(DataProcessor):
     def __init__(self, current_directory):
@@ -280,7 +287,7 @@ class SaccadeProcessor(DataProcessor):
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
             self.rms[current_files[i]] = an.measure_rms_precision(data)
         self.create_new_context()
-        csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        #csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
 
     def create_new_context(self):
