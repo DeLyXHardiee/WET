@@ -116,11 +116,11 @@ def plot_attack_results(filename, attackType):
         return 
     data_x,data_y = list(zip(*data))
     plt.figure()
-    plt.scatter(data_x, data_y, color='blue', s= 0.5)
+    plt.plot(data_x, data_y, marker='o', linestyle='-')
     plt.xlabel('Attack Variable')
     plt.ylabel('Normalized Cross Correlation')
     plt.grid(True)
-    plt.title(f'Attack Type: {attackType}')
+    plt.title(f'Attack Type: {attackType} \n Watermark Strength: 3')
     plt.savefig(f'Results/Plots/{attackType}_plot.png')
     plt.show()
 
