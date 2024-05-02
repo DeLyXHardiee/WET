@@ -13,15 +13,14 @@ import Adversary as ad
 import Analyze as an
 import random
 import sys
-from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor, AttackNCCProcessor
+from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor, AttackAnalysisProcessor
 
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,
     "ATTACK": AttackProcessor,
     "NCC": NCCProcessor,
-    "NCCL": NCCProcessorWithLength,
-    "ATTACKNCC": AttackNCCProcessor,
+    "ATTACK_ANALYSIS": AttackAnalysisProcessor,
     "SACC": SaccadeProcessor
 }
 
@@ -116,18 +115,24 @@ def plot_attack_results(filename, attackType):
         return 
     data_x,data_y = list(zip(*data))
     plt.figure()
-    plt.scatter(data_x, data_y, color='blue', s= 0.5)
-    plt.xlabel('Attack Variable')
+    plt.plot(data_x, data_y, marker='o', linestyle='-')
+    plt.xlabel('Standard Deviation')
     plt.ylabel('Normalized Cross Correlation')
     plt.grid(True)
-    plt.title(f'Attack Type: {attackType}')
+    plt.title(f'Attack Type: {attackType} \n Watermark Strength: 3')
     plt.savefig(f'Results/Plots/{attackType}_plot.png')
     plt.show()
 
 def main():
     # Get command-line arguments excluding the script name
     args = sys.argv[1:]
-
+    """ num = 0.001
+    for i in range(20):
+        if i < 10:
+            num += 0.001
+        else:
+            num += 0.01 
+    args = ["ProcessedDataSets/WM/RandomSaccades/", "ATTACKNCC", "GWN", round(num, 3)] """
     # Ensure that at least one argument is provided
     if not args:
         print("Usage: python main.py <mode1> <parameters1> <mode2> <parameters2> ...")
