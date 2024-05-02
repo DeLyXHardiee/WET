@@ -12,6 +12,31 @@ def GWN_attack(data, std=0.1):
         attacked_data.append(attacked_point)
     return attacked_data
 
+def add_small_noise(point):
+    noise_x = np.random.normal(0, 0.0001)
+    noise_y = np.random.normal(0, 0.0001)
+    return (point[0]-1, point[1] + noise_x, point[2] + noise_y, point[3])
+
+#REMOVES LARGE SPIKES FROM THE DATA, POTENTIALLY DESTROYING EMBED_WATERMARK_3
+def SPIKE_attack(data, spike_dva=1):
+    attacked_data = []
+    spike_count = 0
+    attacked_data.append(add_small_noise(data[1]))
+    for i in range(1, len(data)-1):
+        if abs(data[i][1] - data[i-1][1]) > spike_dva:
+            attacked_data.append(add_small_noise(data[i+1]))
+            spike_count=spike_count + 1
+        elif abs(data[i][2] - data[i-1][2]) > spike_dva:
+            attacked_data.append(add_small_noise(data[i+1]))
+            spike_count=spike_count + 1
+        else:
+            attacked_data.append(data[i])
+    attacked_data.append(data[-1])
+    print("SPIKE_COUNT: " + str(spike_count))
+    return attacked_data
+
+def remove_spike(point):
+    return point
 
 def DEA_attack(watermarked_data, strength):
     # Generate a new watermark for the DEA attack

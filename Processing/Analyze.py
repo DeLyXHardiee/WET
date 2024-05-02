@@ -8,7 +8,7 @@ def measure_saccade_accuracy(true_data, predicted_data):
     if len(true_data) != len(predicted_data):
         print("Truth: " + str(len(true_data)))
         print("Predicted: " + str(len(predicted_data)))
-        raise ValueError("Length of true data and predicted data must be the same")
+        #raise ValueError("Length of true data and predicted data must be the same")
 
     # Extract saccade labels from true and predicted data
     true_saccades = {(point[0], point[3]) for point in true_data if point[3] == 2}
@@ -24,6 +24,40 @@ def measure_saccade_accuracy(true_data, predicted_data):
     # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
     accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
     return accuracy
+
+def denoise_saccade_onset(gaze_data, SACCADE_ONSET_DELAY_MS=4):
+    denoised_data = []
+    current_fixation = []
+    current_saccade = []
+    denoise_count = 0
+    for i, (time, x, y, lab) in enumerate(gaze_data):
+        if lab == 1:  # Fixation
+            current_fixation.append((time, x, y, lab))
+
+            # Check for saccade onset delay
+            if current_saccade and (time - current_saccade[0][0]) < SACCADE_ONSET_DELAY_MS:
+                # Transition from saccade to fixation
+                # Update label of the saccade to fixation (2 to 1)
+                current_saccade = [(t, xx, yy, 1) for t, xx, yy, _ in current_saccade]
+                denoised_data.extend(current_saccade)
+                current_saccade = []
+                denoise_count = denoise_count + 1
+            elif current_saccade and (time - current_saccade[0][0]) >= SACCADE_ONSET_DELAY_MS:
+                denoised_data.extend(current_saccade)
+                current_saccade = []
+
+        elif lab == 2:  # Saccade
+            current_saccade.append((time, x, y, lab))
+            if current_fixation:
+                denoised_data.extend(current_fixation)
+                current_fixation = []
+
+
+    # Append any remaining fixations or saccades
+    denoised_data.extend(current_fixation)
+    denoised_data.extend(current_saccade)
+    print("Denoise count: " + str(denoise_count))
+    return denoised_data
 
 def measure_rms_precision(data):
     current_fixation = []
@@ -147,6 +181,13 @@ def normalized_cross_correlation(signal1, signal2):
     # Convert signals to numpy arrays
     signal1 = np.array(signal1)
     signal2 = np.array(signal2)
-    print("NCC")
+    ncc = np.corrcoef(signal1, signal2)[0, 1]
+    #print("NCC: " + str(ncc))
+    return ncc
 
-    return np.corrcoef(signal1, signal2)[0, 1]
+#test_data = [(1, 1, 1, 1), (2, 1, 1, 1), (3, 1, 1, 2), (4, 1, 1, 2), (5, 1, 1, 2),
+ #(6, 1, 1, 2), (7, 1, 1, 1), (8, 1, 1, 1), (9, 1, 1, 1), (10, 1, 1, 1),
+ #(11, 12, 1, 1), (12, 1, 1, 1), (13, 1, 1, 1), (14, 1, 1, 1), (15, 1, 1, 1),
+ #(16, 1, 1, 2), (17, 1, 1, 2), (18, 1, 1, 1), (19, 1, 1, 1), (20, 1, 1, 1)]
+
+#print(denoise_saccade_onset(test_data))

@@ -13,13 +13,14 @@ import Adversary as ad
 import Analyze as an
 import random
 import sys
-from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, SaccadeProcessor
+from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor
 
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,
     "Attack": AttackProcessor,
     "NCC": NCCProcessor,
+    "NCCL": NCCProcessorWithLength,
     "SACC": SaccadeProcessor
 }
 
@@ -103,9 +104,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#Run examples
-#Watermark
-#py .\NewRun.py ProcessedDataSets/CLEAN/RandomSaccades/ WM 1
-#Saccade accuracy
-#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ SACC
