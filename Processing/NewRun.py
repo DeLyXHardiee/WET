@@ -145,18 +145,5 @@ def main():
     process_pipeline(args, filename)
 
 if __name__ == "__main__":
-    #plot_results('Results/SaccadeAccuracies.csv')
-    #plot_attack_results('Results/NCC_AT_AV.csv', "GWN")
     main()
 
-
-
-#Run examples
-#Watermark
-#py .\NewRun.py ProcessedDataSets/CLEAN/RandomSaccades/ WM 1
-#Saccade accuracy
-#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ SACC
-#Attack
-#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ ATTACK GWN 0.001
-#NCC
-#py .\NewRun.py ProcessedDataSets/WM_ATTACKED/RandomSaccades/GWN/ NCC
