@@ -187,7 +187,7 @@ class NCCProcessor(DataProcessor):
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"
 
-class AttackNCCProcessor(DataProcessor):
+class AttackAnalysisProcessor(DataProcessor):
     def __init__(self, current_directory, attack_type, strength):
         self.attack_processor = AttackProcessor(current_directory, attack_type, strength)
 
