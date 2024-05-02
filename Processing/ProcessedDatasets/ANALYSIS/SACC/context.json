@@ -1,6 +1,6 @@
 {
     "Directory 1": "ProcessedDatasets/CLEAN/RandomSaccades//",
-    "Directory 2": "ProcessedDatasets/WM_ATTACKED/RandomSaccades/GWN/",
+    "Directory 2": "ProcessedDatasets/WM/RandomSaccades/",
     "Analysis": "SACC",
     "Scores": {
         "S_1007_S2_RAN.csv": 0.9299605781865965,
