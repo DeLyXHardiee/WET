@@ -1,6 +1,6 @@
 {
     "Dataset": "RandomSaccades",
-    "WM_ID": 963874,
-    "WM_strength": 1.0,
+    "WM_ID": 246645,
+    "WM_strength": 0.04,
     "filter_context_path": "ProcessedDatasets/CLEAN/RandomSaccades/context.json"
 }
