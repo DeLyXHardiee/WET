@@ -109,6 +109,19 @@ def extract_data_with_true_point(csv_file_path):
     })
     return filter_data(extracted_data.apply(lambda row: (row['n'], row['x'], row['y'],row['xT'],row['yT'], row['lab']), axis=1))
 
+def extract_results2(csv_file_path):
+    df = pd.read_csv(csv_file_path)
+    strengths = df['S']
+    saccadeAccuracies = df['SA']
+    visualDegrees = df['VD']
+    rms = df['RMS']
+    extracted_data = pd.DataFrame({
+            'S': strengths,
+            'SA': saccadeAccuracies,
+            'VD': visualDegrees,
+            'RMS': rms,
+            })
+    return extracted_data.apply(lambda row: (row['S'], row['SA'], row['VD'], row['RMS']), axis=1)
 
 def extract_results(csv_file_path):
     print(csv_file_path)
@@ -141,7 +154,6 @@ def extract_results(csv_file_path):
         })
         return filter_data(extracted_data.apply(lambda row: (row['VT'], row['S'], row['SD'], row['NCC']), axis=1))
 
-
 def filter_data(data):
     filtered_data = []
     for i in range(len(data)):
@@ -161,3 +173,6 @@ def append_result(csv_filename, values):
         writer_object = writer(f_object)
         writer_object.writerow(values)
         f_object.close()
+
+def get_reader(file):
+    return csv.reader(file)

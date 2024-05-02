@@ -177,5 +177,3 @@ def test_gaussian_attack_deviation(data, velocity_threshold, deviation):
     attacked_data = ad.gaussian_white_noise_attack(labeled_data, 0, deviation)
     labeled_data2 = ivt.IVT(attacked_data, velocity_threshold)
     print(an.measure_saccade_accuracy(labeled_data, labeled_data2))
-
-

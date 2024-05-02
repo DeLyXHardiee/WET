@@ -249,6 +249,16 @@ class NCCProcessorWithLength(DataProcessor):
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"
 
+class AttackNCCProcessor(DataProcessor):
+    def __init__(self, current_directory, attack_type, strength):
+        self.attack_processor = AttackProcessor(current_directory, attack_type, strength)
+
+    def process_data(self):
+        attacked_data_directory = self.attack_processor.process_data()
+        ncc_processor = NCCProcessor(attacked_data_directory)
+        ncc_processor.process_data()
+        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values()))))
+
 class SaccadeProcessor(DataProcessor):
     def __init__(self, current_directory):
         super().__init__(current_directory)
@@ -256,6 +266,7 @@ class SaccadeProcessor(DataProcessor):
         self.target_directory = self.create_target_directory()
         self.analysis = {}
         self.degrees = {}
+        self.rms = {}
 
     def process_data(self):
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
@@ -267,7 +278,9 @@ class SaccadeProcessor(DataProcessor):
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
+            self.rms[current_files[i]] = an.measure_rms_precision(data)
         self.create_new_context()
+        csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
 
     def create_new_context(self):
@@ -278,6 +291,10 @@ class SaccadeProcessor(DataProcessor):
             "Scores": self.analysis,
             "Mean_score": np.mean(list(self.analysis.values())),
             "Degrees": self.degrees,
+            "Mean_degrees": np.mean(list(self.degrees.values())),
+            "RMS": self.rms,
+            "Mean_RMS": np.mean(list(self.rms.values())),
+            "WM_Strength": self.current_context['WM_strength']
         }
         jsonu.write_context_to_json(new_context, self.target_directory + "context.json")
 

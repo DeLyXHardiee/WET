@@ -13,14 +13,15 @@ import Adversary as ad
 import Analyze as an
 import random
 import sys
-from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor
+from Processors import IVTProcessor, WMProcessor, AttackProcessor, NCCProcessor, NCCProcessorWithLength, SaccadeProcessor, AttackNCCProcessor
 
 dispatch_table = {
     "IVT": IVTProcessor,
     "WM": WMProcessor,
-    "Attack": AttackProcessor,
+    "ATTACK": AttackProcessor,
     "NCC": NCCProcessor,
     "NCCL": NCCProcessorWithLength,
+    "ATTACKNCC": AttackNCCProcessor,
     "SACC": SaccadeProcessor
 }
 
@@ -87,6 +88,42 @@ def plot_comparison(first_file, second_file, strength):
     plt.title('Strength: ' +str(strength))
     plt.show()
 
+def plot_results(filename):
+    data = csvu.extract_results2(filename)
+    data_x,data_y,visualDegrees,rms = list(zip(*data))
+    plt.figure()
+    plt.scatter(data_x, data_y, color='blue', s= 1)
+    plt.xlabel('WM_Strength')
+    plt.ylabel('Saccade Accuracy')
+    plt.grid(True)
+    plt.title('Watermark embedding utility')
+    results_location = '/Results/Plots/'
+    plot = results_location + "S_SA_" + filename[8:-4] + ".png"
+    print(plot)
+    plt.savefig("Results/Plots/S_SA.png")
+    plt.show()
+
+def plot_attack_results(filename, attackType):
+    data = []
+    with open(filename, 'r') as file:
+        reader = csvu.get_reader(file)
+        next(reader)  # Skip header
+        for row in reader:
+            if row[0] == attackType:
+                data.append((float(row[1]), float(row[2])))
+    if not data:
+        print("No data found for the given attack type.")
+        return 
+    data_x,data_y = list(zip(*data))
+    plt.figure()
+    plt.scatter(data_x, data_y, color='blue', s= 0.5)
+    plt.xlabel('Attack Variable')
+    plt.ylabel('Normalized Cross Correlation')
+    plt.grid(True)
+    plt.title(f'Attack Type: {attackType}')
+    plt.savefig(f'Results/Plots/{attackType}_plot.png')
+    plt.show()
+
 def main():
     # Get command-line arguments excluding the script name
     args = sys.argv[1:]
@@ -104,3 +141,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
