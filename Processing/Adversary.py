@@ -83,7 +83,7 @@ def LIA_attack(data, num_insertions):
     attacked_data = data.copy()
     n = len(data)
 
-    for _ in range(num_insertions):
+    for _ in range(int(num_insertions)):
         # Select a random position to insert the new point
         insert_index = random.randint(0, n - 1)
 
@@ -113,7 +113,7 @@ def CA_attack(data, num_removals):
     attacked_data = data.copy()
     n = len(data)
 
-    for _ in range(num_removals):
+    for _ in range(int(num_removals)):
         # Select a random point to remove
         remove_index = random.randint(0, n - 1)
 
