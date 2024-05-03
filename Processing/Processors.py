@@ -165,6 +165,12 @@ class NCCProcessor(DataProcessor):
             att_data = csvu.extract_data(self.current_directory + current_files[i])
             clean_data = csvu.extract_data(self.clean_path + self.get_data_name() + clean_files[i])
             wm_data = csvu.extract_data(self.wm_path + self.get_data_name() + wm_files[i])
+            # In case of size modification attacks, we crop the larger dataset to run NCC
+            while len(att_data) > len(wm_data):
+                att_data = np.delete(att_data, [-1], axis=0)
+            while len(wm_data) > len(att_data):
+                wm_data = np.delete(wm_data, [-1], axis=0)
+                clean_data = np.delete(clean_data, [-1], axis=0)
             real_wm = ew.unrun_watermark(wm_data, clean_data, wm_context["WM_strength"])
             att_wm = ew.unrun_watermark(att_data, clean_data, wm_context["WM_strength"])
             self.analysis[current_files[i]] = an.normalized_cross_correlation(real_wm, att_wm)
@@ -281,6 +287,11 @@ class SaccadeProcessor(DataProcessor):
         for i in range(0, len(current_files)):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
+            # In case of size modification attacks, we crop the larger dataset to run analysis
+            while len(data) > len(truth):
+                data = np.delete(data, [-1], axis=0)
+            while len(truth) > len(data):
+                truth = np.delete(truth, [-1], axis=0)
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
