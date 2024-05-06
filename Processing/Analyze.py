@@ -131,10 +131,21 @@ def angle_between_points(A, B, C):
     angle = np.arccos(cosine_angle)
     return np.degrees(angle)
 
+def average_deviation(signal1, signal2):
+    deviation = 0
+    for i in range(len(signal1)):
+        val = abs(signal1[i]-signal2[i])
+        deviation += val
+        if i < 100:
+            print(str(i) + " " +  str(val))
+    return deviation/len(signal1)
+
 def normalized_cross_correlation(signal1, signal2):
     # Convert signals to numpy arrays
     signal1 = np.array(signal1)
+    #signal1 = np.round(signal1,0)
     signal2 = np.array(signal2)
+    #signal2 = np.round(signal2,0)
     ncc = np.corrcoef(signal1, signal2)[0, 1]
     #print("NCC: " + str(ncc))
     return ncc

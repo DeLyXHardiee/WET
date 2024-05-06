@@ -1,5 +1,6 @@
 import numpy as np
 from Embed_watermark import *
+import Embed_watermark as ew
 
 #NOISE ATTACK
 def GWN_attack(data, std=0.1):
@@ -39,12 +40,7 @@ def remove_spike(point):
     return point
 
 def DEA_attack(watermarked_data, strength):
-    # Generate a new watermark for the DEA attack
-    new_watermark = generate_watermark(len(watermarked_data))
-
-    # Embed the new watermark with the same strength as the original watermark
-    attacked_data = embed_watermark(watermarked_data, new_watermark, strength)
-
+    attacked_data,watermark = ew.run_watermark(watermarked_data, strength)
     return attacked_data
 
 #POINT REPLACEMENT ATTACKS
@@ -61,10 +57,15 @@ def RRP_attack(data, theta):
     """
     attacked_data = data.copy()
     n = len(data)
-    for i in range(n):
-        if random.random() < theta:
+    counter = 0
+    for i in range(1,n):
+        randomnr = random.random()
+        if  randomnr < theta:
+            counter += 1
             # Replace the current point with its previous point
-            attacked_data[i] = data[i - 1]
+            newtuple = (data[i][0],data[i-1][1],data[i-1][2],data[i][3])
+            attacked_data[i] = newtuple
+    print(counter)
     return attacked_data
 
 
