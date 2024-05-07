@@ -9,7 +9,7 @@ import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
-import W_Trace_Watermark as ew
+import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
 import random
@@ -139,7 +139,8 @@ class AttackProcessor(DataProcessor):
             "WM_strength": context["WM_strength"],
             "Attack_type": self.attack_type,
             "Strength": self.strength,
-            "filter_context_path": context["filter_context_path"]
+            "filter_context_path": context["filter_context_path"],
+            "WM_strength": self.current_context["WM_strength"]
         }
         jsonu.write_context_to_json(context, self.target_directory + self.context_file)
 
@@ -165,6 +166,12 @@ class NCCProcessor(DataProcessor):
             att_data = csvu.extract_data(self.current_directory + current_files[i])
             clean_data = csvu.extract_data(self.clean_path + self.get_data_name() + clean_files[i])
             wm_data = csvu.extract_data(self.wm_path + self.get_data_name() + wm_files[i])
+            # In case of size modification attacks, we crop the larger dataset to run NCC
+            while len(att_data) > len(wm_data):
+                att_data = np.delete(att_data, [-1], axis=0)
+            while len(wm_data) > len(att_data):
+                wm_data = np.delete(wm_data, [-1], axis=0)
+                clean_data = np.delete(clean_data, [-1], axis=0)
             real_wm = ew.unrun_watermark(wm_data, clean_data, wm_context["WM_strength"])
             att_wm = ew.unrun_watermark(att_data, clean_data, wm_context["WM_strength"])
             self.analysis[current_files[i]] = an.normalized_cross_correlation(real_wm, att_wm)
@@ -260,17 +267,21 @@ class NCCProcessorWithLength(DataProcessor):
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"
 
-class AttackNCCProcessor(DataProcessor):
+class AttackAnalysisProcessor(DataProcessor):
     def __init__(self, current_directory, attack_type, strength):
         self.attack_processor = AttackProcessor(current_directory, attack_type, strength)
 
     def process_data(self):
         attacked_data_directory = self.attack_processor.process_data()
         ncc_processor = NCCProcessorWithLength(attacked_data_directory, 16)
-        sacc_processor = SaccadeProcessor(attacked_data_directory)
         ncc_processor.process_data()
-        sacc_processor.process_data()
-        csvu.append_result("Results/W_Trace_Watermark/WM_CA_NCC_SACC.csv", (self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values())), np.mean(list(sacc_processor.analysis.values())), np.mean(list(sacc_processor.degrees.values())), np.mean(list(sacc_processor.rms.values()))))
+        saccade_processor = SaccadeProcessor(attacked_data_directory)
+        saccade_processor.process_data()
+        csvu.append_result("Results/W_Trace_Watermark/WM_CA_NCC_SACC.csv",(self.attack_processor.attack_type, self.attack_processor.strength,
+                                                    np.mean(list(ncc_processor.analysis.values())),
+                                                    np.mean(list(saccade_processor.analysis.values())),
+                                                    np.mean(list(saccade_processor.degrees.values())),
+                                                    np.mean(list(saccade_processor.rms.values()))))
 
 class SaccadeProcessor(DataProcessor):
     def __init__(self, current_directory):
@@ -282,20 +293,30 @@ class SaccadeProcessor(DataProcessor):
         self.rms = {}
 
     def process_data(self):
+        clean_files = csvu.list_csv_files_in_directory(self.clean_path)
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
         truth_files = csvu.list_csv_files_in_directory(self._get_truth_folder())
         for i in range(0, len(current_files)):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
             data, truth = self.crop_data(data, truth)
+            clean = csvu.extract_data(self.clean_path + 'RandomSaccades/' + truth_files[i])
+            # In case of size modification attacks, we crop the larger dataset to run analysis
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
-            self.rms[current_files[i]] = an.measure_rms_precision(data)
+            self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,clean))
         self.create_new_context()
         #csvu.append_result("Results/W_Trace_Watermark/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
+    
+    def convert_watermarked_categorizations(self,WMData,clean):
+        converted = []
+        for i in range(len(WMData)):
+            newTuple = (clean[i][0],WMData[i][1],WMData[i][2],clean[i][3])
+            converted.append(newTuple)
+        return converted
 
     def create_new_context(self):
         new_context = {
