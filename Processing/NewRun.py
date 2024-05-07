@@ -139,6 +139,24 @@ def main():
     # Process the pipeline
     process_pipeline(args, filename)
 
+def main2():
+    num = 8
+    for i in range(2):
+        num += 1
+        args = ["ProcessedDataSets/WM/RandomSaccades/", "ATTACKNCC", "CA", num]
+        # Ensure that at least one argument is provided
+        if not args:
+            print("Usage: python main.py <mode1> <parameters1> <mode2> <parameters2> ...")
+            sys.exit(1)
+
+        # Extract the filename from the first argument
+        filename = args.pop(0)
+
+        # Process the pipeline
+        process_pipeline(args, filename)
+
 if __name__ == "__main__":
-    main()
+    #main()
+    main2()
+
 
