@@ -136,6 +136,7 @@ class AttackProcessor(DataProcessor):
         context = {
             "Dataset": self.current_context["Dataset"],
             "WM_ID": context["WM_ID"],
+            "WM_strength": context["WM_strength"],
             "Attack_type": self.attack_type,
             "Strength": self.strength,
             "filter_context_path": context["filter_context_path"]
@@ -195,7 +196,7 @@ class NCCProcessor(DataProcessor):
 class NCCProcessorWithLength(DataProcessor):
     def __init__(self, old_directory, slize_size):
         super().__init__(old_directory)
-        self.analysis_type = "NCCL"
+        self.analysis_type = "NCC"
         self.slize_size = int(slize_size)
         self.target_directory = self.create_target_directory()
         self.analysis = {}
@@ -210,6 +211,7 @@ class NCCProcessorWithLength(DataProcessor):
             att_data = csvu.extract_data(self.current_directory + current_files[i])
             clean_data = csvu.extract_data(self.clean_path + self.get_data_name() + clean_files[i])
             wm_data = csvu.extract_data(self.wm_path + self.get_data_name() + wm_files[i])
+            att_data, clean_data, wm_data = self.crop_data(att_data, clean_data, wm_data)
             real_wm = ew.unrun_watermark(wm_data, clean_data, wm_context["WM_strength"])
             att_wm = ew.unrun_watermark(att_data, clean_data, wm_context["WM_strength"])
             ncc_values = []
@@ -223,7 +225,10 @@ class NCCProcessorWithLength(DataProcessor):
                 # Compute NCC for the current slice pair
                 ncc_slice = an.normalized_cross_correlation(real_wm_slice, att_wm_slice)
                 # Append the NCC value to the list
-                ncc_values.append(ncc_slice)
+                if math.isnan(ncc_slice):
+                    print("NCC was nan for slice: " + str(real_wm_slice) + " " + str(att_wm_slice))
+                else:
+                    ncc_values.append(ncc_slice)
             # Compute the mean NCC value across all slices
                 mean_ncc = np.mean(ncc_values)
                 self.analysis[current_files[i]] = mean_ncc
@@ -231,6 +236,12 @@ class NCCProcessorWithLength(DataProcessor):
             print("Mean NCC: " + str(mean_ncc))
         self.create_new_context()
         return self.target_directory
+
+    def crop_data(self, data1, data2, data3):
+        length = min(len(data1), len(data2), len(data3))
+        return data1[0:length], data2[0:length], data3[0:length]
+
+
 
     def create_new_context(self):
         wm_context = jsonu.extract_context(self.wm_path + self.get_data_name() + self.context_file)
@@ -255,9 +266,11 @@ class AttackNCCProcessor(DataProcessor):
 
     def process_data(self):
         attacked_data_directory = self.attack_processor.process_data()
-        ncc_processor = NCCProcessor(attacked_data_directory)
+        ncc_processor = NCCProcessorWithLength(attacked_data_directory, 16)
+        sacc_processor = SaccadeProcessor(attacked_data_directory)
         ncc_processor.process_data()
-        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values()))))
+        sacc_processor.process_data()
+        csvu.append_result("Results/W_Trace_Watermark/WM_CA_NCC_SACC.csv", (self.attack_processor.attack_type, self.attack_processor.strength, np.mean(list(ncc_processor.analysis.values())), np.mean(list(sacc_processor.analysis.values())), np.mean(list(sacc_processor.degrees.values())), np.mean(list(sacc_processor.rms.values()))))
 
 class SaccadeProcessor(DataProcessor):
     def __init__(self, current_directory):
@@ -274,13 +287,14 @@ class SaccadeProcessor(DataProcessor):
         for i in range(0, len(current_files)):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
+            data, truth = self.crop_data(data, truth)
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
             self.rms[current_files[i]] = an.measure_rms_precision(data)
         self.create_new_context()
-        csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        #csvu.append_result("Results/W_Trace_Watermark/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
 
     def create_new_context(self):
@@ -294,12 +308,16 @@ class SaccadeProcessor(DataProcessor):
             "Mean_degrees": np.mean(list(self.degrees.values())),
             "RMS": self.rms,
             "Mean_RMS": np.mean(list(self.rms.values())),
-            "WM_Strength": self.current_context['WM_strength']
+            "WM_strength": self.current_context['WM_strength']
         }
         jsonu.write_context_to_json(new_context, self.target_directory + "context.json")
 
     def _get_truth_folder(self):
         return self.clean_path + self.get_data_name() + "/"
+
+    def crop_data(self, data1, data2):
+        length = min(len(data1), len(data2))
+        return data1[0:length], data2[0:length]
 
     def create_target_directory(self):
         return self.analysis_path + self.analysis_type + "/"

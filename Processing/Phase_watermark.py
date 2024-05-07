@@ -39,21 +39,15 @@ def get_FFT(complex_transformation):
     fft_result = np.fft.fft(complex_transformation)
     return fft_result
 
-def embed_watermark(fft, watermark, strength):
-    # Extract amplitude and phase from the original FFT output
-    amplitudes = np.real(fft)
+def embed_watermark(fft,watermark,strength):
     phases = np.imag(fft)
-    # Modify the amplitude based on the watermark and strength
-    modified_amplitudes = amplitudes + (watermark * strength)
-    # Reconstruct the modified FFT output
-    modified_fft = modified_amplitudes + (phases * 1j)
-
-    return modified_fft
+    modified_phases = np.add(np.multiply(watermark, strength), phases)
+    return np.add(np.real(fft), np.multiply(1j, np.imag(modified_phases)))
 
 def extract_watermark(original_fft, watermark_fft, strength):
-    original_amplitudes = np.real(original_fft)
-    watermark_amplitudes = np.real(watermark_fft)
-    return (watermark_amplitudes - original_amplitudes) / strength
+    original_phases = np.imag(original_fft)
+    watermark_phases = np.imag(watermark_fft)
+    return np.divide(np.subtract(watermark_phases, original_phases), strength)
 
 def get_IFFT(fft):
     return np.fft.ifft(fft)
@@ -61,7 +55,7 @@ def get_IFFT(fft):
 def revert_from_complex_numbers(ifft,data):
     points = []
     for i in range(0,len(data)):
-        points.append((data[i][0], np.real(ifft[i]), np.imag(ifft[i]), data[i][3]))
+        points.append((data[i][0], ifft[i].real, ifft[i].imag, data[i][3]))
     return points
 
 def run_watermark(data, strength, wm_size=16):

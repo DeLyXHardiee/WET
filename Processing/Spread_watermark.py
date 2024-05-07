@@ -39,21 +39,15 @@ def get_FFT(complex_transformation):
     fft_result = np.fft.fft(complex_transformation)
     return fft_result
 
-def embed_watermark(fft, watermark, strength):
-    # Extract amplitude and phase from the original FFT output
+def embed_watermark(fft, watermark):
     amplitudes = np.real(fft)
-    phases = np.imag(fft)
-    # Modify the amplitude based on the watermark and strength
-    modified_amplitudes = amplitudes + (watermark * strength)
-    # Reconstruct the modified FFT output
-    modified_fft = modified_amplitudes + (phases * 1j)
+    modified_amplitudes = np.add(watermark, amplitudes)
+    return np.add(modified_amplitudes, np.multiply(1j, np.imag(fft)))
 
-    return modified_fft
-
-def extract_watermark(original_fft, watermark_fft, strength):
+def extract_watermark(original_fft, watermark_fft):
     original_amplitudes = np.real(original_fft)
     watermark_amplitudes = np.real(watermark_fft)
-    return (watermark_amplitudes - original_amplitudes) / strength
+    return np.subtract(watermark_amplitudes, original_amplitudes)
 
 def get_IFFT(fft):
     return np.fft.ifft(fft)
@@ -61,7 +55,7 @@ def get_IFFT(fft):
 def revert_from_complex_numbers(ifft,data):
     points = []
     for i in range(0,len(data)):
-        points.append((data[i][0], np.real(ifft[i]), np.imag(ifft[i]), data[i][3]))
+        points.append((data[i][0], ifft[i].real, ifft[i].imag, data[i][3]))
     return points
 
 def run_watermark(data, strength, wm_size=16):
@@ -74,7 +68,7 @@ def run_watermark(data, strength, wm_size=16):
         # Get the FFT of the slice
         fft_slice = get_FFT(complex_slice)
         # Embed a slice of the watermark in the slice
-        embedded_slice = embed_watermark(fft_slice, watermark[idx:end_idx], strength)
+        embedded_slice = embed_watermark(fft_slice, watermark[idx:end_idx])
         # Get the IFFT of the slice
         ifft_slice = get_IFFT(embedded_slice)
         new_data.extend(revert_from_complex_numbers(ifft_slice, data[idx:end_idx]))
@@ -90,7 +84,6 @@ def unrun_watermark(watermarked_data, original_data, strength, wm_size=16):
         complex_slice_wm = get_complex_transformation(watermarked_data[idx:end_idx])
         fft_slice_original = get_FFT(complex_slice_original)
         fft_slice_wm = get_FFT(complex_slice_wm)
-        extracted_watermark_slice = extract_watermark(fft_slice_original, fft_slice_wm, strength)
+        extracted_watermark_slice = extract_watermark(fft_slice_original, fft_slice_wm)
         watermark.extend(extracted_watermark_slice)
     return watermark
-

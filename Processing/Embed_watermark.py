@@ -70,12 +70,7 @@ def get_FFT(complex_transformation):
 
 def embed_watermark(fft,watermark,strength):
     amplitudes = np.real(fft)
-    #print(amplitudes)
-    #print(np.multiply(watermark, strength))
-    #print(np.add(np.multiply(watermark, strength), amplitudes))
-    #print(np.imag(fft))
     modified_amplitudes = np.add(np.multiply(watermark, strength), amplitudes)
-    #print(np.add(modified_amplitudes, np.multiply(1j, np.imag(fft))))
     return np.add(modified_amplitudes, np.multiply(1j, np.imag(fft)))
 
 def extract_watermark(original_fft, watermark_fft, strength):
@@ -84,6 +79,7 @@ def extract_watermark(original_fft, watermark_fft, strength):
     return np.divide(np.subtract(watermark_amplitudes, original_amplitudes), strength)
 
 def get_IFFT(fft):
+    np.fft.fftfreq
     return np.fft.ifft(fft)
 
 def revert_from_complex_numbers(ifft,data):
@@ -139,14 +135,6 @@ def run_watermark(data, strength):
     ifft = get_IFFT(embedded_data)
     reverted_ifft = revert_from_complex_numbers(ifft, data)
     return reverted_ifft, watermark
-
-def run_watermark_with_watermark(data, strength, watermark):
-    complex_transformation = get_complex_transformation(data)
-    fft = get_FFT(complex_transformation)
-    embedded_data = embed_watermark(fft,watermark,strength)
-    ifft = get_IFFT(embedded_data)
-    reverted_ifft = revert_from_complex_numbers(ifft, data)
-    return reverted_ifft
 
 def unrun_watermark(watermarked_data, original_data, strength):
     if len(watermarked_data) != len(original_data):
