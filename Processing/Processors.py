@@ -282,11 +282,13 @@ class SaccadeProcessor(DataProcessor):
         self.rms = {}
 
     def process_data(self):
+        clean_files = csvu.list_csv_files_in_directory(self.clean_path)
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
         truth_files = csvu.list_csv_files_in_directory(self._get_truth_folder())
         for i in range(0, len(current_files)):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
+            clean = csvu.extract_data(self.clean_path + 'RandomSaccades/' + truth_files[i])
             # In case of size modification attacks, we crop the larger dataset to run analysis
             while len(data) > len(truth):
                 data = np.delete(data, [-1], axis=0)
@@ -296,10 +298,17 @@ class SaccadeProcessor(DataProcessor):
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
-            self.rms[current_files[i]] = an.measure_rms_precision(data)
+            self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,clean))
         self.create_new_context()
-        #csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
+    
+    def convert_watermarked_categorizations(self,WMData,clean):
+        converted = []
+        for i in range(len(WMData)):
+            newTuple = (clean[i][0],WMData[i][1],WMData[i][2],clean[i][3])
+            converted.append(newTuple)
+        return converted
 
     def create_new_context(self):
         new_context = {
