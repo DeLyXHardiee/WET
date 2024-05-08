@@ -7,7 +7,7 @@ def measure_saccade_accuracy(true_data, predicted_data):
         print("Truth: " + str(len(true_data)))
         print("Predicted: " + str(len(predicted_data)))
         #raise ValueError("Length of true data and predicted data must be the same")
-        raise ValueError("Length of true data and predicted data must be the same")
+        #raise ValueError("Length of true data and predicted data must be the same")
 
 
     # Extract saccade labels from true and predicted data
@@ -24,6 +24,30 @@ def measure_saccade_accuracy(true_data, predicted_data):
     # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
     accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
     return accuracy
+
+def measure_fixation_accuracy(true_data, predicted_data):
+    if len(true_data) != len(predicted_data):
+        print("Truth: " + str(len(true_data)))
+        print("Predicted: " + str(len(predicted_data)))
+        #raise ValueError("Length of true data and predicted data must be the same")
+        #raise ValueError("Length of true data and predicted data must be the same")
+
+
+    # Extract saccade labels from true and predicted data
+    true_fixations = {(point[0], point[3]) for point in true_data if point[3] == 1}
+    predicted_fixations = {(point[0], point[3]) for point in predicted_data if point[3] == 1}
+
+    # Calculate intersection of true and predicted saccades
+    true_positives = len(true_fixations.intersection(predicted_fixations))
+
+    # Calculate precision and recall
+    precision = true_positives / len(predicted_fixations) if predicted_fixations else 0
+    recall = true_positives / len(true_fixations) if true_fixations else 0
+
+    # Calculate accuracy as the harmonic mean of precision and recall (F1 score)
+    accuracy = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
+    return accuracy
+
 
 def denoise_saccade_onset(gaze_data, SACCADE_ONSET_DELAY_MS=4):
     denoised_data = []
@@ -51,6 +75,38 @@ def denoise_saccade_onset(gaze_data, SACCADE_ONSET_DELAY_MS=4):
             if current_fixation:
                 denoised_data.extend(current_fixation)
                 current_fixation = []
+
+    denoised_data.extend(current_saccade)
+    denoised_data.extend(current_fixation)
+    print("Denoise count: " + str(denoise_count))
+    return denoised_data
+
+def denoise_saccade_offset(gaze_data, SACCADE_OFFSET_DELAY_MS=20):
+    denoised_data = []
+    current_fixation = []
+    current_saccade = []
+    denoise_count = 0
+    for i, (time, x, y, lab) in enumerate(gaze_data):
+        if lab == 2:  # Fixation
+            current_saccade.append((time, x, y, lab))
+
+            # Check for saccade onset delay
+            if current_fixation and (time - current_fixation[0][0]) < SACCADE_OFFSET_DELAY_MS:
+                # Transition from saccade to fixation
+                # Update label of the saccade to fixation (2 to 1)
+                current_fixation = [(t, xx, yy, 2) for t, xx, yy, _ in current_fixation]
+                denoised_data.extend(current_fixation)
+                current_fixation = []
+                denoise_count = denoise_count + 1
+            elif current_fixation and (time - current_fixation[0][0]) >= SACCADE_OFFSET_DELAY_MS:
+                denoised_data.extend(current_fixation)
+                current_fixation = []
+
+        elif lab == 1:  # Saccade
+            current_fixation.append((time, x, y, lab))
+            if current_saccade:
+                denoised_data.extend(current_saccade)
+                current_saccade = []
 
 
     # Append any remaining fixations or saccades

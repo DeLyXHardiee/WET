@@ -8,6 +8,7 @@ import Filtering.CSVUtility as csvu
 import Filtering.JSONUtility as jsonu
 import Filtering.IDT as idt
 import Filtering.IVT as ivt
+import Filtering.EyeLink as el
 import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
@@ -140,10 +141,10 @@ def main():
     process_pipeline(args, filename)
 
 def main2():
-    num = 8
-    for i in range(2):
-        num += 1
-        args = ["ProcessedDataSets/WM/RandomSaccades/", "ATTACKNCC", "CA", num]
+    num = 0.00
+    for i in range(10):
+        num += 0.01
+        args = []
         # Ensure that at least one argument is provided
         if not args:
             print("Usage: python main.py <mode1> <parameters1> <mode2> <parameters2> ...")
@@ -156,7 +157,6 @@ def main2():
         process_pipeline(args, filename)
 
 if __name__ == "__main__":
-    #main()
-    main2()
+    main()
 
 

@@ -14,12 +14,12 @@ def get_complex_transformation(data):
         complex_numbers.append(tuple[1] + 1j*tuple[2])
     return complex_numbers
 
-def generate_watermark(length, wm_length):
+def generate_watermark(length, strength_range, wm_length):
     number_of_zeroes = 0
     max_zero = int(wm_length * 0.375)
     watermark = []
     while len(watermark) < wm_length:
-        randomnr = random.randint(-1, 1)
+        randomnr = random.uniform(-strength_range, strength_range)
         if randomnr != 0:
             watermark.append(randomnr)
         else:
@@ -58,9 +58,9 @@ def revert_from_complex_numbers(ifft,data):
         points.append((data[i][0], ifft[i].real, ifft[i].imag, data[i][3]))
     return points
 
-def run_watermark(data, strength, wm_size=16):
+def run_watermark(data, strength_range, wm_size=16):
     new_data = []
-    watermark = generate_watermark(len(data), wm_size)
+    watermark = generate_watermark(len(data), strength_range, wm_size)
     for idx in range(0, len(data), wm_size):
         end_idx = min(idx + wm_size, len(data))
         # Extract a slice from the complex transformation
@@ -74,7 +74,7 @@ def run_watermark(data, strength, wm_size=16):
         new_data.extend(revert_from_complex_numbers(ifft_slice, data[idx:end_idx]))
     return new_data, watermark
 
-def unrun_watermark(watermarked_data, original_data, strength, wm_size=16):
+def unrun_watermark(watermarked_data, original_data, strength_range, wm_size=16):
     watermark = []
     if len(watermarked_data) != len(original_data):
         raise ValueError("Length of true data and predicted data must be the same")

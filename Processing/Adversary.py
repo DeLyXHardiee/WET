@@ -1,5 +1,5 @@
 import numpy as np
-from Embed_watermark import *
+from W_Trace_watermark import *
 
 #NOISE ATTACK
 def GWN_attack(data, std=0.1):

@@ -44,6 +44,8 @@ def filter_data(data):
 
 
 def IVT(protocol, velocity_threshold=0):
+    isFixation = False
+    fixationCount = 0
     if velocity_threshold == 0:
         velocity_threshold = find_best_threshold(protocol)
     fixations = []
@@ -55,8 +57,16 @@ def IVT(protocol, velocity_threshold=0):
             velocity = calculate_velocity(fixations[-1], point)
             if velocity < velocity_threshold:
                 fixations.append((point[0], point[1], point[2], 1))
+                if not isFixation:
+                    isFixation = True
+                    fixationCount += 1
             else:
                 fixations.append((point[0], point[1], point[2], 2))
+                isFixation = False
+
+    print("FIXATION COUNT: " + str(fixationCount))
+    #fixations = denoise_saccade_onset(fixations)
+    #fixations = denoise_saccade_offset(fixations)
     return fixations
 
 
@@ -71,7 +81,7 @@ def calculate_velocity(point1, point2):
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
-    threshold_range = [0.04, 0.05, 0.06, 0.07, 0.08]
+    threshold_range = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 
     best_threshold = 0.0
     best_f1_score = 0.0
@@ -92,21 +102,3 @@ def find_best_threshold(protocol):
             best_f1_score = f1_score
 
     return best_threshold
-
-
-def IVT(protocol, velocity_threshold=0.05):
-    if velocity_threshold == 0:
-        velocity_threshold = find_best_threshold(protocol)
-    fixations = []
-    fixations.append(protocol[0])
-    for i in range(1, len(protocol)):
-        point = protocol[i]
-        if (len(fixations) == 0):
-            fixations.append(point)
-        else:
-            velocity = calculate_velocity(fixations[-1], point)
-            if velocity < velocity_threshold:
-                fixations.append((point[0], point[1], point[2], 1))
-            else:
-                fixations.append((point[0], point[1], point[2], 2))
-    return fixations

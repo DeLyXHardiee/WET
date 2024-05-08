@@ -8,8 +8,8 @@ import Filtering.CSVUtility as csvu
 import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
-import Filtering.IVT as ivt
-import Embed_watermark as ew
+import Filtering.EyeLink as ivt
+import W_Trace_watermark as ew
 import Adversary as ad
 import Analyze as an
 import random
@@ -48,6 +48,7 @@ class IVTProcessor(DataProcessor):
 
 
     def process_data(self):
+        print("DOING IVT")
         files = csvu.list_csv_files_in_directory(self.current_directory)
         for file in files:
             data = csvu.extract_data(self.current_directory + file)
@@ -58,6 +59,7 @@ class IVTProcessor(DataProcessor):
 
     def create_new_context(self):
         new_context = {}
+        print("creating new context for: " + self.current_directory)
         files = csvu.list_csv_files_in_directory(self.current_directory)
         for file in files:
             new_context[file] = ivt.find_best_threshold(csvu.extract_data(self.current_directory + file))
@@ -87,6 +89,7 @@ class WMProcessor(DataProcessor):
             velocity = self.velocities[file]
             data, watermark = ew.run_watermark(data, self.strength)
             data = ivt.IVT(data, velocity)
+            data = an.denoise_saccade_offset(data)
             csvu.write_data(self.target_directory + file, data)
         self.create_new_context()
         return self.target_directory
@@ -289,26 +292,31 @@ class SaccadeProcessor(DataProcessor):
         self.analysis_type = "SACC"
         self.target_directory = self.create_target_directory()
         self.analysis = {}
+        self.fixations = {}
         self.degrees = {}
         self.rms = {}
 
     def process_data(self):
-        clean_files = csvu.list_csv_files_in_directory(self.clean_path)
+        print("Performing SACCADE accuracy")
+        print("Truth folder: " + self._get_truth_folder())
+        print("Current directory: " + self.current_directory)
         current_files = csvu.list_csv_files_in_directory(self.current_directory)
         truth_files = csvu.list_csv_files_in_directory(self._get_truth_folder())
         for i in range(0, len(current_files)):
             data = csvu.extract_data(self.current_directory + current_files[i])
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
             data, truth = self.crop_data(data, truth)
-            clean = csvu.extract_data(self.clean_path + 'RandomSaccades/' + truth_files[i])
             # In case of size modification attacks, we crop the larger dataset to run analysis
             self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
+            self.fixations[current_files[i]] = an.measure_fixation_accuracy(data, truth)
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
+            print("FIXATION accuracy: " + str(self.fixations[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
-            self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,clean))
+            self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,truth))
+            print("RMS performed: " + str(self.rms[current_files[i]]))
         self.create_new_context()
-        #csvu.append_result("Results/W_Trace_Watermark/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        #csvu.append_result("Results/W_Trace_Watermark_Spread/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
     
     def convert_watermarked_categorizations(self,WMData,clean):
@@ -324,12 +332,13 @@ class SaccadeProcessor(DataProcessor):
             "Directory 2": self.current_directory,
             "Analysis": self.analysis_type,
             "Scores": self.analysis,
-            "Mean_score": np.mean(list(self.analysis.values())),
+            "Mean_saccade_accuracy_score": np.mean(list(self.analysis.values())),
+            "Mean_fixation_accuracy_score": np.mean(list(self.fixations.values())),
             "Degrees": self.degrees,
             "Mean_degrees": np.mean(list(self.degrees.values())),
             "RMS": self.rms,
-            "Mean_RMS": np.mean(list(self.rms.values())),
-            "WM_strength": self.current_context['WM_strength']
+            "Mean_RMS": np.mean(list(self.rms.values()))
+            #"WM_strength": self.current_context['WM_strength']
         }
         jsonu.write_context_to_json(new_context, self.target_directory + "context.json")
 
