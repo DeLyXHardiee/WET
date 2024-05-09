@@ -1,6 +1,6 @@
 import numpy as np
 from W_Trace_watermark import *
-
+import Embed_watermark as ew
 #NOISE ATTACK
 def GWN_attack(data, std=0.1):
     mean=0
@@ -41,7 +41,7 @@ def remove_spike(point):
 
 def DEA_attack(watermarked_data, strength):
 
-    attacked_data,_ = run_watermark(watermarked_data, strength)
+    attacked_data,_ = ew.run_watermark(watermarked_data, strength)
 
     return attacked_data
 

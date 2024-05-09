@@ -8,7 +8,8 @@ import Filtering.CSVUtility as csvu
 import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
-import Filtering.EyeLink as ivt
+#import Filtering.EyeLink as ivt
+import Filtering.IVT as ivt
 #import W_Trace_watermark as ew
 import Embed_watermark as ew
 import Adversary as ad
@@ -54,7 +55,7 @@ class IVTProcessor(DataProcessor):
         for file in files:
             data = csvu.extract_data(self.current_directory + file)
             velocity = self.velocities[file]
-            data = ivt.IVT(data, velocity)
+            data = ivt.IVT(data, 0)
             csvu.write_data(self.target_directory + file, data)
         return self.target_directory
 
@@ -89,7 +90,7 @@ class WMProcessor(DataProcessor):
             data = csvu.extract_data(self.current_directory + file)
             velocity = self.velocities[file]
             data, watermark = ew.run_watermark(data, self.strength)
-            data = ivt.IVT(data, velocity)
+            data = ivt.IVT(data, 0)
             data = an.denoise_saccade_offset(data)
             csvu.write_data(self.target_directory + file, data)
         self.create_new_context()
@@ -125,7 +126,7 @@ class AttackProcessor(DataProcessor):
             attack_function = getattr(ad, f"{self.attack_type}_attack")
             data = attack_function(data, self.strength)
             velocity = self.velocities[file]
-            data = ivt.IVT(data, velocity)
+            data = ivt.IVT(data, 0)
             csvu.write_data(self.target_directory + file, data)
         self.create_new_context()
         return self.target_directory
@@ -277,7 +278,7 @@ class AttackAnalysisProcessor(DataProcessor):
 
     def process_data(self):
         attacked_data_directory = self.attack_processor.process_data()
-        ncc_processor = NCCProcessorWithLength(attacked_data_directory, 16)
+        ncc_processor = NCCProcessor(attacked_data_directory)
         ncc_processor.process_data()
         saccade_processor = SaccadeProcessor(attacked_data_directory)
         saccade_processor.process_data()
@@ -317,7 +318,7 @@ class SaccadeProcessor(DataProcessor):
             self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,truth))
             print("RMS performed: " + str(self.rms[current_files[i]]))
         self.create_new_context()
-        #csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        #csvu.append_result("Results/W_Trace_Watermark_Spread/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
     
     def convert_watermarked_categorizations(self,WMData,clean):

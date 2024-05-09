@@ -87,7 +87,7 @@ def denoise_saccade_offset(gaze_data, SACCADE_OFFSET_DELAY_MS=20):
     current_saccade = []
     denoise_count = 0
     for i, (time, x, y, lab) in enumerate(gaze_data):
-        if lab == 2:  # Fixation
+        if lab == 2 or lab == 0:  # Fixation
             current_saccade.append((time, x, y, lab))
 
             # Check for saccade onset delay

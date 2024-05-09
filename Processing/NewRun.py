@@ -148,29 +148,31 @@ if __name__ == "__main__":
     values_list = []
 
     # Define the start and end points, and the increment
-    start = 0.001
-    end = 0.0101
-    increment = 0.001
+    start = 0.01
+    end = 0.101
+    increment = 0.01
 
     # Loop to generate the values and add them to the list
     current_value = start
     while current_value <= end:
-        values_list.append(current_value)
+        values_list.append(round(current_value,5))
         current_value += increment
     dict = {
         'DEA': [1,2,3,4,5,6,7,8,9,10],
         'GWN': values_list,
         'RRP': values_list,
-        'LIA': values_list,
-        'CA': values_list,
+        #'LIA': values_list,
+        #'CA': values_list,
     }
+    #main(['../Datasets/RandomSaccades/','IVT'])
+    #main(['ProcessedDataSets/CLEAN/RandomSaccades/','WM','3'])
+    
     for key,values in dict.items():
         print(values)
         for value in values:
-            main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'CA', '1'])  
-            continue
+            main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', key, str(value)])  
+            #continue
     #for i in values_list:
-    #main(['ProcessedDataSets/CLEAN/RandomSaccades/','WM','3'])
         #main(['ProcessedDataSets/WM/RandomSaccades/','SACC'])
     #    main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'DEA', str(i)])
     #    main(['ProcessedDataSets/WM_ATTACKED/RandomSaccades/RRP/', 'SACC'])
