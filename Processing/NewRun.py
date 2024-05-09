@@ -125,9 +125,9 @@ def plot_attack_results(filename, attackType):
     plt.savefig(f'Results/Plots/{attackType}_plot.png')
     plt.show()
 
-def main():
+def main(args):
     # Get command-line arguments excluding the script name
-    args = sys.argv[1:]
+    #args = sys.argv[1:]
 
     # Ensure that at least one argument is provided
     if not args:
@@ -136,27 +136,54 @@ def main():
 
     # Extract the filename from the first argument
     filename = args.pop(0)
-
     # Process the pipeline
     process_pipeline(args, filename)
 
-def main2():
-    num = 0.00
-    for i in range(10):
-        num += 0.01
-        args = []
-        # Ensure that at least one argument is provided
-        if not args:
-            print("Usage: python main.py <mode1> <parameters1> <mode2> <parameters2> ...")
-            sys.exit(1)
-
-        # Extract the filename from the first argument
-        filename = args.pop(0)
-
-        # Process the pipeline
-        process_pipeline(args, filename)
-
 if __name__ == "__main__":
-    main()
+    #plot_results('Results/SaccadeAccuracies.csv')
+    #plot_attack_results('Results/NCC_AT_AV.csv', "GWN")
+    #plot_comparison('ProcessedDatasets/WM/RandomSaccades/S_1002_S1_RAN.csv','ProcessedDatasets/CLEAN/RandomSaccades/S_1002_S1_RAN.csv',3)
+    #values = [range(0.001,0.01,0.001)]
+    
+    values_list = []
+
+    # Define the start and end points, and the increment
+    start = 0.001
+    end = 0.0101
+    increment = 0.001
+
+    # Loop to generate the values and add them to the list
+    current_value = start
+    while current_value <= end:
+        values_list.append(current_value)
+        current_value += increment
+    dict = {
+        'DEA': [1,2,3,4,5,6,7,8,9,10],
+        'GWN': values_list,
+        'RRP': values_list,
+        'LIA': values_list,
+        'CA': values_list,
+    }
+    for key,values in dict.items():
+        print(values)
+        for value in values:
+            main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'CA', '1'])  
+            continue
+    #for i in values_list:
+    #main(['ProcessedDataSets/CLEAN/RandomSaccades/','WM','3'])
+        #main(['ProcessedDataSets/WM/RandomSaccades/','SACC'])
+    #    main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'DEA', str(i)])
+    #    main(['ProcessedDataSets/WM_ATTACKED/RandomSaccades/RRP/', 'SACC'])
+    #main("xd")
 
 
+
+#Run examples
+#Watermark
+#py .\NewRun.py ProcessedDataSets/CLEAN/RandomSaccades/ WM 1
+#Saccade accuracy
+#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ SACC
+#Attack
+#py .\NewRun.py ProcessedDataSets/WM/RandomSaccades/ ATTACK GWN 0.001
+#NCC
+#py .\NewRun.py ProcessedDataSets/WM_ATTACKED/RandomSaccades/GWN/ NCC
