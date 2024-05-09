@@ -1,7 +1,6 @@
+import random
 import numpy as np
-from Embed_watermark import *
 import Embed_watermark as ew
-
 #NOISE ATTACK
 def GWN_attack(data, std=0.1):
     mean=0
@@ -40,7 +39,9 @@ def remove_spike(point):
     return point
 
 def DEA_attack(watermarked_data, strength):
-    attacked_data,watermark = ew.run_watermark(watermarked_data, strength)
+
+    attacked_data,_ = ew.run_watermark(watermarked_data, strength)
+
     return attacked_data
 
 #POINT REPLACEMENT ATTACKS

@@ -82,6 +82,6 @@ def classify_eye_movements(data):
 
 
     # Pack the data with new labels into the output list
-    return result
+    return sorted(result, key=lambda x: x[0])
 
 

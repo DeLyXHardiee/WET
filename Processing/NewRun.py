@@ -110,19 +110,19 @@ def plot_attack_results(filename, attackType):
         next(reader)  # Skip header
         for row in reader:
             if row[0] == attackType:
-                data.append((float(row[1]), float(row[2])))
+                data.append((float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5])))
     if not data:
         print("No data found for the given attack type.")
         return 
-    data_x,data_y = list(zip(*data))
+    s,ncc,sa,vd,rms = list(zip(*data))
     plt.figure()
-    plt.plot(data_x, data_y, marker='o', linestyle='-')
-    plt.xlabel('Attack Variable')
-    plt.ylabel('Normalized Cross Correlation')
+    plt.plot(s, rms, marker='o', linestyle='-')
+    plt.xlabel('Standard deviation')
+    plt.ylabel('RMS')
     plt.grid(True)
     plt.title(f'Attack Type: {attackType} \n Watermark Strength: 3')
-    plt.savefig(f'Results/Plots/{attackType}_plot.png')
-    plt.show()
+    plt.savefig(f'Results/Plots/{attackType}_AV_RMS_plot.png')
+    #plt.show()
 
 def main(args):
     # Get command-line arguments excluding the script name
@@ -146,18 +146,35 @@ if __name__ == "__main__":
     values_list = []
 
     # Define the start and end points, and the increment
-    start = 1
-    end = 2.1
+    start = 1.1
+    end = 1.8
     increment = 0.1
 
     # Loop to generate the values and add them to the list
     current_value = start
     while current_value <= end:
-        values_list.append(current_value)
+        values_list.append(round(current_value,5))
         current_value += increment
-    for i in values_list:
-        main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'DEA', str(i)])
-        #main(['ProcessedDataSets/CLEAN/RandomSaccades/', 'WM', '3'])
+    dict = {
+        'DEA': [1.1,1.2,1.3,1.4,1.5,1.6,1.7],
+        #'GWN': values_list,
+        #'RRP': values_list,
+        #'LIA': values_list,
+        #'CA': values_list,
+    }
+    #main(['../Datasets/RandomSaccades/','IVT'])
+    #main(['ProcessedDataSets/CLEAN/RandomSaccades/','WM','3'])
+    #main(['ProcessedDataSets/WM/RandomSaccades/','SACC'])
+    for key,values in dict.items():
+        print(values)
+        for value in values:
+            main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', key, value])  
+            #continue
+    #for i in values_list:
+
+    
+    
+    #    main(['ProcessedDataSets/WM/RandomSaccades/', 'ATTACK_ANALYSIS', 'DEA', str(i)])
     #    main(['ProcessedDataSets/WM_ATTACKED/RandomSaccades/RRP/', 'SACC'])
     #main("xd")
 
