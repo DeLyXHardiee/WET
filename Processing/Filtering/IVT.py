@@ -81,7 +81,7 @@ def calculate_velocity(point1, point2):
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
-    threshold_range = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
+    threshold_range = [0.03, 0.04, 0.05, 0.06, 0.07, 0.08]
 
     best_threshold = 0.0
     best_f1_score = 0.0

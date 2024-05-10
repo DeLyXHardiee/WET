@@ -192,6 +192,5 @@ def normalized_cross_correlation(signal1, signal2):
     signal1 = np.array(signal1)
     signal2 = np.array(signal2)
     ncc = np.corrcoef(signal1, signal2)[0, 1]
-    #print("NCC: " + str(ncc))
     return ncc
 

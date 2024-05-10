@@ -89,7 +89,6 @@ class WMProcessor(DataProcessor):
             velocity = self.velocities[file]
             data, watermark = ew.run_watermark(data, self.strength)
             data = ivt.IVT(data, velocity)
-            data = an.denoise_saccade_offset(data)
             csvu.write_data(self.target_directory + file, data)
         self.create_new_context()
         return self.target_directory
