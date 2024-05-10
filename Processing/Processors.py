@@ -9,7 +9,8 @@ import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
 import Filtering.EyeLink as ivt
-import W_Trace_watermark as ew
+#import W_Trace_watermark as ew
+import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
 import random
@@ -279,7 +280,7 @@ class AttackAnalysisProcessor(DataProcessor):
         ncc_processor.process_data()
         saccade_processor = SaccadeProcessor(attacked_data_directory)
         saccade_processor.process_data()
-        csvu.append_result("Results/W_Trace_Watermark/WM_CA_NCC_SACC.csv",(self.attack_processor.attack_type, self.attack_processor.strength,
+        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength,
                                                     np.mean(list(ncc_processor.analysis.values())),
                                                     np.mean(list(saccade_processor.analysis.values())),
                                                     np.mean(list(saccade_processor.degrees.values())),
@@ -315,7 +316,7 @@ class SaccadeProcessor(DataProcessor):
             self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,truth))
             print("RMS performed: " + str(self.rms[current_files[i]]))
         self.create_new_context()
-        #csvu.append_result("Results/W_Trace_Watermark_Spread/WM_STRENGTH_SACC.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
+        #csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
     
     def convert_watermarked_categorizations(self,WMData,clean):
