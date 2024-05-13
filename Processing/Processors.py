@@ -9,7 +9,6 @@ import Filtering.JSONUtility as jsonu
 import Filtering.BINUtility as binu
 import Filtering.IDT as idt
 import Filtering.EyeLink as ivt
-#import W_Trace_watermark as ew
 import Embed_watermark as ew
 import Adversary as ad
 import Analyze as an
@@ -63,8 +62,19 @@ class IVTProcessor(DataProcessor):
         print("creating new context for: " + self.current_directory)
         files = csvu.list_csv_files_in_directory(self.current_directory)
         for file in files:
-            new_context[file] = ivt.find_best_threshold(csvu.extract_data(self.current_directory + file))
+            data = csvu.extract_data(self.current_directory + file)
+            vel, score = ivt.find_best_threshold(data)
+            new_context[file] = vel
+            new_context[file + " SCORE"] = score
+            new_context[file + " RMS"] = an.measure_rms_precision(data)
         new_context["Dataset"] = self.current_context["Dataset"]
+        sacc_acc = 0
+        rms_acc = 0
+        for file in files:
+           sacc_acc = sacc_acc + new_context[file + " SCORE"]
+           rms_acc = rms_acc + new_context[file + " RMS"]
+        new_context["MEAN_SACC"] = sacc_acc / len(files)
+        new_context["MEAN_RMS"] = rms_acc / len(files)
         jsonu.write_context_to_json(new_context, self.target_directory + self.context_file)
 
     def _load_velocities(self):
@@ -244,7 +254,7 @@ class NCCProcessorWithLength(DataProcessor):
                 self.analysis[current_files[i]] = mean_ncc
             print("NCC performed on: " + current_files[i])
             print("Mean NCC: " + str(mean_ncc))
-        self.create_new_context()
+        #self.create_new_context()
         return self.target_directory
 
     def crop_data(self, data1, data2, data3):
@@ -276,11 +286,11 @@ class AttackAnalysisProcessor(DataProcessor):
 
     def process_data(self):
         attacked_data_directory = self.attack_processor.process_data()
-        ncc_processor = NCCProcessorWithLength(attacked_data_directory, 16)
+        ncc_processor = NCCProcessor(attacked_data_directory)
         ncc_processor.process_data()
         saccade_processor = SaccadeProcessor(attacked_data_directory)
         saccade_processor.process_data()
-        csvu.append_result("Results/NCC_AT_AV.csv",(self.attack_processor.attack_type, self.attack_processor.strength,
+        csvu.append_result(f"Results/{self.attack_processor.attack_type}_NO_SLICE.csv",(self.attack_processor.attack_type, self.attack_processor.strength,
                                                     np.mean(list(ncc_processor.analysis.values())),
                                                     np.mean(list(saccade_processor.analysis.values())),
                                                     np.mean(list(saccade_processor.degrees.values())),
@@ -307,15 +317,15 @@ class SaccadeProcessor(DataProcessor):
             truth = csvu.extract_data(self._get_truth_folder() + truth_files[i])
             data, truth = self.crop_data(data, truth)
             # In case of size modification attacks, we crop the larger dataset to run analysis
-            self.analysis[current_files[i]] = an.measure_saccade_accuracy(data, truth)
-            self.fixations[current_files[i]] = an.measure_fixation_accuracy(data, truth)
+            self.analysis[current_files[i]] = an.measure_saccade_accuracy(truth, data)
+            #self.fixations[current_files[i]] = an.measure_fixation_accuracy(truth, data)
             print("SACC performed on: " + current_files[i])
             print("SACC accuracy: " + str(self.analysis[current_files[i]]))
-            print("FIXATION accuracy: " + str(self.fixations[current_files[i]]))
+            #print("FIXATION accuracy: " + str(self.fixations[current_files[i]]))
             self.degrees[current_files[i]] = an.measure_degrees_of_visual_angle(data,truth)
             self.rms[current_files[i]] = an.measure_rms_precision(self.convert_watermarked_categorizations(data,truth))
             print("RMS performed: " + str(self.rms[current_files[i]]))
-        self.create_new_context()
+        #self.create_new_context()
         #csvu.append_result("Results/SaccadeAccuracies.csv",(self.current_context['WM_strength'],np.mean(list(self.analysis.values())),np.mean(list(self.degrees.values())),np.mean(list(self.rms.values()))))
         return self.target_directory
     

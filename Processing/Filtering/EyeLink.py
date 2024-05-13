@@ -83,19 +83,8 @@ def IVT(data, vel):
         result.extend(current_saccade)
     if (len(current_fixation) > 0):
         result.extend(current_fixation)
-
-    check_if_data_is_sorted(result)
     # Pack the data with new labels into the output list
     return result
-
-def check_if_data_is_sorted(data):
-    count = 0
-    for i in range(len(data)-1):
-        if data[i][0]+1 != data[i+1][0] and data[i][0]+1 > data[i+1][0]:
-            count += 1
-            print("Datapoints out of order:" + str(data[i][0]) + " and " + str(data[i+1][0]))
-    print("Datapoints not sorted : " + str(count))
-
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
