@@ -104,6 +104,4 @@ def find_best_threshold(protocol):
                 final_data = fixations
                 best_vel = vel
                 best_f1_score = f1_score
-    print("BEST F1 SCORE: " + str(best_f1_score))
-    print("BEST VEL SCORE: " + str(best_vel))
     return best_vel, best_f1_score
