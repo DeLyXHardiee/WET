@@ -1,5 +1,9 @@
 import numpy as np
-from W_Trace_watermark import *
+import random
+import Embed_watermark as ew
+import Filtering.CSVUtility as csvu
+import Filtering.EyeLink as ivt
+
 
 #NOISE ATTACK
 def GWN_attack(data, std=0.1):
@@ -41,7 +45,7 @@ def remove_spike(point):
 
 def DEA_attack(watermarked_data, strength):
 
-    attacked_data,_ = run_watermark(watermarked_data, strength)
+    attacked_data,_ = ew.run_watermark(watermarked_data, strength)
 
     return attacked_data
 
@@ -97,7 +101,7 @@ def LIA_attack(data, num_insertions):
 
         # Insert the new point at the selected position
         attacked_data.insert(insert_index, new_point)
-    return correct_timestamps(attacked_data)
+    return attacked_data
 
 
 
@@ -125,19 +129,21 @@ def CA_attack(data, num_removals):
         attacked_data = np.delete(attacked_data, remove_index, axis=0)
         n -= 1
 
-    return(correct_timestamps(attacked_data))
+    return attacked_data
 
 def correct_timestamps(data):
     corrected_data = []
-    for i in range(len(data)):
+    for i in range(1, len(data)):
         n, x, y, lab = data[i]
-        if i < len(data) - 1:
-            next_n = data[i + 1][0]
-            if next_n != n + 1:
-                # If the next timestamp is not incremented by one, correct it
-                corrected_data.append((n + 1, x, y, lab))
-            else:
-                corrected_data.append((n, x, y, lab))
-        else:
-            corrected_data.append((n, x, y, lab))  # Keep the last point as is
+        corrected_data.append((i, x, y, lab))# Keep the last point as is
     return corrected_data
+
+#data = csvu.extract_data("ProcessedDatasets/WM_ATTACKED/RandomSaccades/LIA/S_1002_S1_RAN.csv")
+#files = csvu.list_csv_files_in_directory("../Datasets/RandomSaccades/")
+#for file in files:
+    #data = csvu.extract_data("../Datasets/RandomSaccades/" + file)
+    #ivt.IVT(data, 30)
+
+#data = csvu.extract_data("ProcessedDatasets/CLEAN/RandomSaccades/S_1002_S1_RAN.csv")
+
+#ivt.check_if_data_is_sorted(data)
