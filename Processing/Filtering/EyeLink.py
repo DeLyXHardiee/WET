@@ -88,7 +88,7 @@ def IVT(data, vel):
 
 def find_best_threshold(protocol):
     # Define a range of possible velocity thresholds
-    velocity_range = [30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]
+    velocity_range = [30, 35, 40, 45, 50]
 
     best_vel = 0.0
     best_f1_score = 0.0
@@ -104,4 +104,6 @@ def find_best_threshold(protocol):
                 final_data = fixations
                 best_vel = vel
                 best_f1_score = f1_score
+    print(f"Best vel: {best_vel}")
+    print(f"Best F1: {best_f1_score}")
     return best_vel, best_f1_score
